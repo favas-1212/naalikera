@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nalikera.com - Find Skilled Climbers & Cutters</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" xintegrity="sha512-SnH5WK+bZxgPHs44uWIX+LLMDJzL31Y9WwQ68jW0XgfszK2fylsZcEJJ96t35p2b5v+tJ9j/Q+Bv2c4uD0z5uQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        /* Define custom colors and font for Tailwind */
+        :root {
+            --color-primary: #1d8c7c; /* Dark Tropical Green (Nalikera/Coconut Theme) */
+            --color-dark: #125c50; /* Deep Green */
+            --color-text: #1a202c; /* Dark Text */
+            --color-accent: #f59e0b; /* Golden Yellow for highlights/cursor */
+        }
+        
+        /* Custom Cursor Style & Animation */
+        @keyframes pulse-border {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        #cursor-follower {
+            position: fixed;
+            width: 30px;
+            height: 30px;
+            border: 3px solid var(--color-accent); /* New color for the following circle */
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), border-color 0.2s, background-color 0.2s;
+            mix-blend-mode: normal; /* Less aggressive than exclusion for this design */
+            animation: pulse-border 2s infinite ease-in-out; /* The animating method */
+        }
+        
+        .interactive {
+            cursor: pointer;
+        }
+
+        .interactive:hover ~ #cursor-follower {
+            transform: translate(-50%, -50%) scale(2.5);
+            background-color: var(--color-primary);
+            border-color: transparent;
+            animation: none; /* Stop pulsing on hover */
+        }
+
+        /* Scroll Reveal Animation Styles (Custom CSS for smoothness) */
+        .scroll-animate {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+
+        .scroll-animate.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .scroll-animate.slide-left {
+            transform: translateX(-40px);
+        }
+
+        .scroll-animate.slide-left.is-visible {
+            transform: translateX(0);
+        }
+        
+        /* Custom gradient text for the logo/accents */
+        .logo-gradient {
+            background-image: linear-gradient(to right, var(--color-primary), #48bb78);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        /* Booking form background illustration */
+        .hero-bg-pattern {
+            background-image: url("data:image/svg+xml,%3Csvg width='800' height='200' viewBox='0 0 800 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 100 L200 100 L200 0 L400 0 L400 100 L600 100 L600 0 L800 0 V200 H0 Z' fill='none' stroke='%23d0f9d9' stroke-width='1'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: repeat-x;
+            background-size: contain;
+            background-position: bottom;
+        }
+
+        /* Destination Card Hover Effect - Maintained original style */
+        .destination-card {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .destination-card::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(29, 140, 124, 0.4); /* Primary color overlay */
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1;
+        }
+        .destination-card:hover::after {
+            opacity: 1;
+        }
+        .destination-card-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Featured Tour Card Badge - Maintained original style */
+        .featured-badge {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background-color: var(--color-primary);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+
+        /* --- Fruit Movement Animations (NEW) --- */
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(1deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+        
+        @keyframes bounce-slow {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .floating-item {
+            position: absolute;
+            opacity: 0.1;
+            animation-name: float;
+            animation-duration: 6s;
+            animation-timing-function: ease-in-out;
+            animation-iteration-count: infinite;
+            pointer-events: none;
+            z-index: 0; /* Ensure it stays behind content */
+        }
+
+        .item-1 { top: 10%; left: 5%; animation-duration: 7s; }
+        .item-2 { top: 60%; right: 10%; animation-duration: 5s; }
+        .item-3 { bottom: 10%; left: 20%; animation-duration: 8s; }
+        .item-4 { top: 30%; right: 40%; animation-duration: 6.5s; }
+    </style>
+    <script>
+        // Set up Tailwind configuration dynamically for custom colors
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-nalikera': 'var(--color-primary)',
+                        'dark-nalikera': 'var(--color-dark)',
+                        'accent-gold': 'var(--color-accent)',
+                        'dark-text': 'var(--color-text)',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-sans text-dark-text min-h-screen">
+
+    <!-- Custom Mouse Follower -->
+    <div id="cursor-follower"></div>
+
+    <!-- Header / Navbar -->
+    <header class="sticky top-0 z-50 bg-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <!-- Logo -->
+                <div class="text-3xl font-extrabold tracking-tight">
+                    <span class="logo-gradient interactive">Nalikera.com</span>
+                </div>
+                <!-- Navigation (Desktop) - Kept same as original structure -->
+                <nav class="hidden md:flex space-x-8">
+                    <a href="#" class="text-gray-600 hover:text-primary-nalikera font-medium interactive">Home</a>
+                    <a href="#" class="text-gray-600 hover:text-primary-nalikera font-medium interactive">Our Workers</a>
+                    <a href="#" class="text-gray-600 hover:text-primary-nalikera font-medium interactive">Book Service</a>
+                    <a href="#" class="text-gray-600 hover:text-primary-nalikera font-medium interactive">About Us</a>
+                    <a href="#" class="text-gray-600 hover:text-primary-nalikera font-medium interactive">Contact</a>
+                </nav>
+                <!-- CTA Button (Desktop) -->
+                <div class="hidden md:block">
+                    <button class="px-6 py-2 bg-primary-nalikera text-white font-semibold rounded-full hover:bg-dark-nalikera transition duration-300 shadow-lg interactive">
+                        Hire Now
+                    </button>
+                </div>
+                <!-- Mobile Menu Button (Hamburger) -->
+                <div class="md:hidden">
+                    <button class="text-gray-600 hover:text-primary-nalikera interactive">
+                        <i class="fas fa-bars text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section with Booking Form -->
+        <section id="hero" class="pt-20 pb-40 relative overflow-hidden bg-white hero-bg-pattern">
+             <!-- Floating Animated Items -->
+            <div class="floating-item item-1">
+                <i class="fas fa-tree text-primary-nalikera text-6xl"></i> <!-- Placeholder for Coconut Tree/Leaf -->
+            </div>
+            <div class="floating-item item-2">
+                <span style="font-size: 4rem;">🥭</span> <!-- Mango Emoji -->
+            </div>
+            <div class="floating-item item-3">
+                <span style="font-size: 4rem;">🥥</span> <!-- Coconut Emoji -->
+            </div>
+            <div class="floating-item item-4">
+                <i class="fas fa-leaf text-accent-gold text-5xl"></i> <!-- Placeholder for Areca Leaf -->
+            </div>
+            <!-- End Floating Animated Items -->
+
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 scroll-animate" data-delay="0.1">
+                <p class="text-primary-nalikera font-semibold mb-2 scroll-animate" data-delay="0.2">Quick Booking</p>
+                <h1 class="text-6xl md:text-7xl font-extrabold leading-tight mb-6 text-dark-text scroll-animate" data-delay="0.3">
+                    Skilled Hands for Your Harvest
+                </h1>
+                <p class="text-lg text-gray-500 max-w-3xl mx-auto mb-12 scroll-animate" data-delay="0.4">
+                    Instantly book verified coconut climbers, fruit cutters, and farm helpers across Kerala. Trust and safety guaranteed.
+                </p>
+
+                <!-- Booking Form (Maintained Original Structure) -->
+                <div class="bg-white p-4 md:p-8 rounded-2xl shadow-xl max-w-5xl mx-auto transform -translate-y-4">
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                        <!-- Location -->
+                        <div class="relative group">
+                            <label class="block text-sm font-medium text-gray-500 text-left mb-1">Location</label>
+                            <div class="flex items-center border border-gray-200 rounded-xl p-3 bg-white hover:border-primary-nalikera transition duration-200 interactive">
+                                <i class="fas fa-map-marker-alt text-gray-400 mr-3"></i>
+                                <input type="text" placeholder="Your City/Village" class="w-full focus:outline-none placeholder-gray-400 text-sm"/>
+                            </div>
+                        </div>
+
+                        <!-- Service Type (Dropdown: UPDATED) -->
+                        <div class="relative group interactive">
+                            <label class="block text-sm font-medium text-gray-500 text-left mb-1">Service Type</label>
+                            <div class="flex items-center border border-gray-200 rounded-xl p-3 bg-white hover:border-primary-nalikera transition duration-200 cursor-pointer" onclick="toggleDropdown(this)">
+                                <i class="fas fa-tractor text-gray-400 mr-3"></i>
+                                <span class="w-full text-sm text-gray-700" id="booking-type-text">Coconut Climbing</span>
+                                <i class="fas fa-chevron-down text-xs text-gray-400 ml-2 transition-transform duration-200"></i>
+                            </div>
+                            <div class="absolute top-full mt-2 w-full bg-white rounded-lg shadow-xl z-20 hidden" data-dropdown="true">
+                                <!-- UPDATED DROPDOWN OPTIONS -->
+                                <a href="#" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 interactive" onclick="selectOption(this, 'booking-type')">Coconut Climbing</a>
+                                <a href="#" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 interactive" onclick="selectOption(this, 'booking-type')">Jackfruit Cutting</a>
+                                <a href="#" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 interactive" onclick="selectOption(this, 'booking-type')">Mango Picking</a>
+                                <a href="#" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 interactive" onclick="selectOption(this, 'booking-type')">Areca Nut Harvest</a>
+                                <a href="#" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 interactive" onclick="selectOption(this, 'booking-type')">Cashew Collection</a>
+                            </div>
+                        </div>
+
+                        <!-- Date -->
+                        <div class="relative group">
+                            <label class="block text-sm font-medium text-gray-500 text-left mb-1">Select Date</label>
+                            <div class="flex items-center border border-gray-200 rounded-xl p-3 bg-white hover:border-primary-nalikera transition duration-200 interactive">
+                                <i class="fas fa-calendar-alt text-gray-400 mr-3"></i>
+                                <input type="text" placeholder="Select Date" onfocus="(this.type='date')" onblur="(this.type='text')" class="w-full focus:outline-none placeholder-gray-400 text-sm"/>
+                            </div>
+                        </div>
+
+                        <!-- Workers (Dropdown: UPDATED) -->
+                        <div class="relative group interactive">
+                            <label class="block text-sm font-medium text-gray-500 text-left mb-1">Number of Workers</label>
+                            <div class="flex items-center border border-gray-200 rounded-xl p-3 bg-white hover:border-primary-nalikera transition duration-200 cursor-pointer" onclick="toggleDropdown(this)">
+                                <i class="fas fa-users text-gray-400 mr-3"></i>
+                                <span class="w-full text-sm text-gray-700" id="number-of-workers-text">01 Worker</span>
+                                <i class="fas fa-chevron-down text-xs text-gray-400 ml-2 transition-transform duration-200"></i>
+                            </div>
+                            <div class="absolute top-full mt-2 w-full bg-white rounded-lg shadow-xl z-20 hidden" data-dropdown="true">
+                                <a href="#" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 interactive" onclick="selectOption(this, 'number-of-workers')">01 Worker</a>
+                                <a href="#" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 interactive" onclick="selectOption(this, 'number-of-workers')">02 Workers</a>
+                                <a href="#" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 interactive" onclick="selectOption(this, 'number-of-workers')">03 Workers</a>
+                                <a href="#" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 interactive" onclick="selectOption(this, 'number-of-workers')">04+ Workers</a>
+                            </div>
+                        </div>
+
+                        <!-- Search Button -->
+                        <div class="flex items-end">
+                            <button class="w-full h-[52px] bg-primary-nalikera text-white font-semibold rounded-xl hover:bg-dark-nalikera transition duration-300 shadow-lg interactive">
+                                Find Workers
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Line Drawing/Illustration (Kept original structure) -->
+                <div class="mt-8">
+                    <svg width="100%" height="200" viewBox="0 0 1200 200" preserveAspectRatio="xMinYMax meet" class="text-gray-200 mx-auto" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M0 190L1200 190" stroke="currentColor" stroke-width="2"/>
+                        <path d="M50 190V100L80 100V190M150 190V50L190 50V190M250 190V120L300 120V190M400 190V80L450 80V190M500 190V150L530 150V190M600 190V40L640 40V190M700 190V130L750 130V190M800 190V70L840 70V190M900 190V100L950 100V190M1050 190V60L1080 60V190" stroke="currentColor" stroke-width="2"/>
+                        <circle cx="50" cy="90" r="5" fill="currentColor"/>
+                        <circle cx="170" cy="40" r="5" fill="currentColor"/>
+                        <circle cx="275" cy="110" r="5" fill="currentColor"/>
+                        <circle cx="425" cy="70" r="5" fill="currentColor"/>
+                        <circle cx="515" cy="140" r="5" fill="currentColor"/>
+                        <circle cx="620" cy="30" r="5" fill="currentColor"/>
+                        <circle cx="725" cy="120" r="5" fill="currentColor"/>
+                        <circle cx="820" cy="60" r="5" fill="currentColor"/>
+                        <circle cx="925" cy="90" r="5" fill="currentColor"/>
+                        <circle cx="1065" cy="50" r="5" fill="currentColor"/>
+                    </svg>
+                </div>
+            </div>
+        </section>
+
+        <!-- Top Destinations (Now: Our Skilled Workers) Section -->
+        <section id="destinations" class="py-24 bg-gray-50 overflow-hidden">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <p class="text-primary-nalikera font-semibold mb-2 scroll-animate" data-delay="0.1"><i class="fas fa-user-hard-hat mr-2"></i> Meet Our Professionals</p>
+                <h2 class="text-4xl font-extrabold mb-4 text-dark-text scroll-animate" data-delay="0.2">Highly Rated Climbers & Cutters</h2>
+                <p class="text-gray-500 max-w-2xl mx-auto mb-16 scroll-animate" data-delay="0.3">Book skilled workers with verified background and safety equipment for any harvest task.</p>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <!-- Worker Card 1: Coconut Climber -->
+                    <div class="destination-card rounded-xl shadow-lg hover:shadow-2xl scroll-animate" data-delay="0.4">
+                        <img src="https://placehold.co/400x500/1d8c7c/ffffff?text=Coconut+Climber" alt="Coconut Climber" class="w-full h-96 object-cover rounded-xl"/>
+                        <div class="absolute bottom-0 left-0 p-6 w-full destination-card-content">
+                            <h3 class="text-2xl font-bold text-white mb-2">Coconut Climbers</h3>
+                            <span class="inline-block bg-accent-gold text-dark-text text-xs font-semibold px-3 py-1 rounded-full">15 Available</span>
+                        </div>
+                    </div>
+                    <!-- Worker Card 2: Jackfruit Cutter -->
+                    <div class="destination-card rounded-xl shadow-lg hover:shadow-2xl scroll-animate" data-delay="0.5">
+                        <img src="https://placehold.co/400x500/f59e0b/ffffff?text=Jackfruit+Cutter" alt="Jackfruit Cutter" class="w-full h-96 object-cover rounded-xl"/>
+                        <div class="absolute bottom-0 left-0 p-6 w-full destination-card-content">
+                            <h3 class="text-2xl font-bold text-white mb-2">Jackfruit Cutters</h3>
+                            <span class="inline-block bg-accent-gold text-dark-text text-xs font-semibold px-3 py-1 rounded-full">8 Available</span>
+                        </div>
+                    </div>
+                    <!-- Worker Card 3: Mango Picker -->
+                    <div class="destination-card rounded-xl shadow-lg hover:shadow-2xl scroll-animate" data-delay="0.6">
+                        <img src="https://placehold.co/400x500/8b5cf6/ffffff?text=Mango+Picker" alt="Mango Picker" class="w-full h-96 object-cover rounded-xl"/>
+                        <div class="absolute bottom-0 left-0 p-6 w-full destination-card-content">
+                            <h3 class="text-2xl font-bold text-white mb-2">Mango Pickers</h3>
+                            <span class="inline-block bg-accent-gold text-dark-text text-xs font-semibold px-3 py-1 rounded-full">10 Available</span>
+                        </div>
+                    </div>
+                    <!-- Worker Card 4: Areca Nut Collector -->
+                    <div class="destination-card rounded-xl shadow-lg hover:shadow-2xl scroll-animate" data-delay="0.7">
+                        <img src="https://placehold.co/400x500/48bb78/ffffff?text=Areca+Collector" alt="Areca Nut Collector" class="w-full h-96 object-cover rounded-xl"/>
+                        <div class="absolute bottom-0 left-0 p-6 w-full destination-card-content">
+                            <h3 class="text-2xl font-bold text-white mb-2">Areca Nut Collectors</h3>
+                            <span class="inline-block bg-accent-gold text-dark-text text-xs font-semibold px-3 py-1 rounded-full">12 Available</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Why Choose Us Section -->
+        <section id="why-choose-us" class="py-24 bg-white relative overflow-hidden">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="lg:flex lg:items-center lg:space-x-12">
+                    <!-- Left Column: Images (Maintained Original Structure) -->
+                    <div class="lg:w-1/2 relative h-[500px] mb-12 lg:mb-0 scroll-animate slide-left" data-delay="0.1">
+                        <!-- Big Image: Worker on a ladder/tree -->
+                        <img src="https://placehold.co/600x450/125c50/ffffff?text=Worker+Safety+First" alt="Worker Safety" class="w-3/4 h-auto object-cover rounded-xl shadow-2xl absolute top-0 left-0 transform -rotate-3"/>
+                        <!-- Small Overlapping Image: Fruit harvest close up -->
+                        <img src="https://placehold.co/300x250/1d8c7c/ffffff?text=Quality+Harvest" alt="Harvest" class="w-1/2 h-auto object-cover rounded-xl shadow-2xl absolute bottom-0 right-0 transform translate-x-4 translate-y-4 rotate-3"/>
+                        <!-- Custom Green Circle with Arrow -->
+                        <div class="absolute bottom-20 left-1/3 bg-primary-nalikera w-20 h-20 rounded-full flex items-center justify-center shadow-lg interactive transition-all hover:scale-110">
+                            <i class="fas fa-arrow-right text-white text-2xl"></i>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Content (Maintained Original Structure) -->
+                    <div class="lg:w-1/2 scroll-animate" data-delay="0.3">
+                        <p class="text-primary-nalikera font-semibold mb-2"><i class="fas fa-shield-alt mr-2"></i> Our Promise</p>
+                        <h2 class="text-4xl font-extrabold mb-8 text-dark-text">Why Choose Nalikera.com</h2>
+                        <p class="text-gray-500 max-w-xl mb-12">We guarantee verified workers, transparent pricing, and timely service for all your agricultural needs.</p>
+
+                        <!-- Feature 1: Verified Workers -->
+                        <div class="flex items-start mb-8">
+                            <div class="flex-shrink-0 w-12 h-12 bg-primary-nalikera bg-opacity-10 text-primary-nalikera rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-user-check text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold mb-1">Verified Professionals</h3>
+                                <p class="text-gray-500 text-sm">Every worker is background-checked and rated by the community for safety and skill.</p>
+                            </div>
+                        </div>
+
+                        <!-- Feature 2: Safety & Gear -->
+                        <div class="flex items-start mb-8">
+                            <div class="flex-shrink-0 w-12 h-12 bg-primary-nalikera bg-opacity-10 text-primary-nalikera rounded-lg flex items-center justify-center mr-4">
+                                <i class="fas fa-hard-hat text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold mb-1">Guaranteed Safety Gear</h3>
+                                <p class="text-gray-500 text-sm">Workers arrive equipped with modern safety tools, ensuring minimal risk and property protection.</p>
+                            </div>
+                        </div>
+
+                        <button class="mt-4 px-8 py-3 bg-primary-nalikera text-white font-semibold rounded-full hover:bg-dark-nalikera transition duration-300 shadow-lg interactive">
+                            View Pricing
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Featured Tours (Now: Our Top Service Packages) Section -->
+        <section id="featured-tours" class="py-24 bg-gray-50 overflow-hidden">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <p class="text-primary-nalikera font-semibold mb-2 scroll-animate" data-delay="0.1"><i class="fas fa-box-open mr-2"></i> Best Value</p>
+                <h2 class="text-4xl font-extrabold mb-4 text-dark-text scroll-animate" data-delay="0.2">Our Top Service Packages</h2>
+                <p class="text-gray-500 max-w-2xl mx-auto mb-16 scroll-animate" data-delay="0.3">Select from pre-defined packages for the most efficient and cost-effective harvest solution.</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- Package Card 1: Coconut Full Harvest -->
+                    <div class="bg-white rounded-xl shadow-lg hover:shadow-2xl transition duration-300 overflow-hidden scroll-animate" data-delay="0.4">
+                        <div class="relative">
+                            <img src="https://placehold.co/600x400/125c50/ffffff?text=Climbing+Package" alt="Climbing Package" class="w-full h-64 object-cover"/>
+                            <span class="featured-badge">Save 40%</span>
+                        </div>
+                        <div class="p-6 text-left">
+                            <p class="text-xs font-semibold text-primary-nalikera mb-2">Seasonal Offer</p>
+                            <h4 class="text-3xl font-bold text-dark-text mb-4">₹2999/Day</h4>
+                            <h3 class="text-xl font-semibold mb-3 hover:text-primary-nalikera transition duration-200 interactive">Full Coconut Harvest (1 Acre)</h3>
+                            <div class="flex items-center text-sm text-gray-500 border-t pt-3">
+                                <span class="text-yellow-500 mr-2"><i class="fas fa-star"></i> 4.8</span>
+                                <span class="mr-2">| 300 Bookings</span>
+                                <span class="flex-grow text-right"><i class="fas fa-map-marker-alt"></i> South Kerala</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Package Card 2: Jackfruit & Mango -->
+                    <div class="bg-white rounded-xl shadow-lg hover:shadow-2xl transition duration-300 overflow-hidden scroll-animate" data-delay="0.5">
+                        <div class="relative">
+                            <img src="https://placehold.co/600x400/f59e0b/ffffff?text=Fruit+Cutting" alt="Fruit Cutting" class="w-full h-64 object-cover"/>
+                            <span class="featured-badge">New Launch</span>
+                        </div>
+                        <div class="p-6 text-left">
+                            <p class="text-xs font-semibold text-primary-nalikera mb-2">New</p>
+                            <h4 class="text-3xl font-bold text-dark-text mb-4">₹1899/Half Day</h4>
+                            <h3 class="text-xl font-semibold mb-3 hover:text-primary-nalikera transition duration-200 interactive">Jackfruit & Mango Cutting Service</h3>
+                            <div class="flex items-center text-sm text-gray-500 border-t pt-3">
+                                <span class="text-yellow-500 mr-2"><i class="fas fa-star"></i> 5.0</span>
+                                <span class="mr-2">| 120 Bookings</span>
+                                <span class="flex-grow text-right"><i class="fas fa-map-marker-alt"></i> Central Kerala</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Package Card 3: Multi-Crop -->
+                    <div class="bg-white rounded-xl shadow-lg hover:shadow-2xl transition duration-300 overflow-hidden scroll-animate" data-delay="0.6">
+                        <div class="relative">
+                            <img src="https://placehold.co/600x400/1d8c7c/ffffff?text=Multi+Crop+Help" alt="Multi-Crop Help" class="w-full h-64 object-cover"/>
+                            <span class="featured-badge">Best Value</span>
+                        </div>
+                        <div class="p-6 text-left">
+                            <p class="text-xs font-semibold text-primary-nalikera mb-2">All-in-One</p>
+                            <h4 class="text-3xl font-bold text-dark-text mb-4">₹4999/Week</h4>
+                            <h3 class="text-xl font-semibold mb-3 hover:text-primary-nalikera transition duration-200 interactive">Weekly Farm Assistance (All Crops)</h3>
+                            <div class="flex items-center text-sm text-gray-500 border-t pt-3">
+                                <span class="text-yellow-500 mr-2"><i class="fas fa-star"></i> 4.9</span>
+                                <span class="mr-2">| 450 Bookings</span>
+                                <span class="flex-grow text-right"><i class="fas fa-map-marker-alt"></i> North Kerala</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Gallery Section (Maintained Original Structure) -->
+        <section id="gallery" class="py-24 bg-white overflow-hidden">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <p class="text-primary-nalikera font-semibold mb-2 scroll-animate" data-delay="0.1"><i class="fas fa-camera-retro mr-2"></i> Action Shots</p>
+                <h2 class="text-4xl font-extrabold mb-4 text-dark-text scroll-animate" data-delay="0.2">Recent Harvest Gallery</h2>
+                <p class="text-gray-500 max-w-2xl mx-auto mb-16 scroll-animate" data-delay="0.3">See our skilled workers in action, ensuring the best yield and safety standards.</p>
+                
+                <!-- Simple responsive grid instead of masonry for single-file complexity, ensuring good layout -->
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                    <div class="col-span-1 row-span-2 overflow-hidden rounded-xl group relative interactive scroll-animate" style="height: 30rem;" data-delay="0.4">
+                        <img src="https://placehold.co/600x800/2d3748/ffffff?text=Coconut+Harvest" alt="Coconut Harvest" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-500"/>
+                        <div class="absolute inset-0 bg-primary-nalikera bg-opacity-0 group-hover:bg-opacity-30 transition duration-500 flex items-center justify-center">
+                            <i class="fas fa-camera text-white text-3xl opacity-0 group-hover:opacity-100 transition duration-300"></i>
+                        </div>
+                    </div>
+                    <div class="col-span-1 overflow-hidden rounded-xl group relative interactive scroll-animate" style="height: 14.5rem;" data-delay="0.5">
+                        <img src="https://placehold.co/600x400/4a5568/ffffff?text=Jackfruit+Cutting" alt="Jackfruit Cutting" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-500"/>
+                        <div class="absolute inset-0 bg-primary-nalikera bg-opacity-0 group-hover:bg-opacity-30 transition duration-500 flex items-center justify-center">
+                            <i class="fas fa-camera text-white text-3xl opacity-0 group-hover:opacity-100 transition duration-300"></i>
+                        </div>
+                    </div>
+                    <div class="col-span-1 overflow-hidden rounded-xl group relative interactive scroll-animate" style="height: 14.5rem;" data-delay="0.6">
+                        <img src="https://placehold.co/600x400/2c5282/ffffff?text=Mango+Picking+Crew" alt="Mango Picking Crew" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-500"/>
+                        <div class="absolute inset-0 bg-primary-nalikera bg-opacity-0 group-hover:bg-opacity-30 transition duration-500 flex items-center justify-center">
+                            <i class="fas fa-camera text-white text-3xl opacity-0 group-hover:opacity-100 transition duration-300"></i>
+                        </div>
+                    </div>
+                    <div class="col-span-2 row-span-2 overflow-hidden rounded-xl group relative interactive scroll-animate" style="height: 30rem;" data-delay="0.7">
+                        <img src="https://placehold.co/800x600/319795/ffffff?text=Areca+Nut+Drying" alt="Areca Nut Drying" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-500"/>
+                        <div class="absolute inset-0 bg-primary-nalikera bg-opacity-0 group-hover:bg-opacity-30 transition duration-500 flex items-center justify-center">
+                            <i class="fas fa-camera text-white text-3xl opacity-0 group-hover:opacity-100 transition duration-300"></i>
+                        </div>
+                    </div>
+                    <div class="col-span-1 overflow-hidden rounded-xl group relative interactive scroll-animate" style="height: 14.5rem;" data-delay="0.8">
+                        <img src="https://placehold.co/600x400/2a4365/ffffff?text=Cashew+Collection" alt="Cashew Collection" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-500"/>
+                        <div class="absolute inset-0 bg-primary-nalikera bg-opacity-0 group-hover:bg-opacity-30 transition duration-500 flex items-center justify-center">
+                            <i class="fas fa-camera text-white text-3xl opacity-0 group-hover:opacity-100 transition duration-300"></i>
+                        </div>
+                    </div>
+                    <div class="col-span-1 overflow-hidden rounded-xl group relative interactive scroll-animate" style="height: 14.5rem;" data-delay="0.9">
+                        <img src="https://placehold.co/600x400/9b2c2c/ffffff?text=Palm+Climbing+Gear" alt="Climbing Gear" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-500"/>
+                        <div class="absolute inset-0 bg-primary-nalikera bg-opacity-0 group-hover:bg-opacity-30 transition duration-500 flex items-center justify-center">
+                            <i class="fas fa-camera text-white text-3xl opacity-0 group-hover:opacity-100 transition duration-300"></i>
+                        </div>
+                    </div>
+                    <div class="col-span-1 overflow-hidden rounded-xl group relative interactive scroll-animate" style="height: 14.5rem;" data-delay="1.0">
+                        <img src="https://placehold.co/600x400/38a169/ffffff?text=Worker+Rest" alt="Worker Rest" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-500"/>
+                        <div class="absolute inset-0 bg-primary-nalikera bg-opacity-0 group-hover:bg-opacity-30 transition duration-500 flex items-center justify-center">
+                            <i class="fas fa-camera text-white text-3xl opacity-0 group-hover:opacity-100 transition duration-300"></i>
+                        </div>
+                    </div>
+                    <div class="col-span-1 overflow-hidden rounded-xl group relative interactive scroll-animate" style="height: 14.5rem;" data-delay="1.1">
+                        <img src="https://placehold.co/600x400/805ad5/ffffff?text=Customer+Review" alt="Customer Review" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-500"/>
+                        <div class="absolute inset-0 bg-primary-nalikera bg-opacity-0 group-hover:bg-opacity-30 transition duration-500 flex items-center justify-center">
+                            <i class="fas fa-camera text-white text-3xl opacity-0 group-hover:opacity-100 transition duration-300"></i>
+                        </div>
+                    </div>
+                    <div class="col-span-1 overflow-hidden rounded-xl group relative interactive scroll-animate" style="height: 14.5rem;" data-delay="1.2">
+                        <img src="https://placehold.co/600x400/d53f8c/ffffff?text=Fresh+Coconuts" alt="Fresh Coconuts" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-500"/>
+                        <div class="absolute inset-0 bg-primary-nalikera bg-opacity-0 group-hover:bg-opacity-30 transition duration-500 flex items-center justify-center">
+                            <i class="fas fa-camera text-white text-3xl opacity-0 group-hover:opacity-100 transition duration-300"></i>
+                        </div>
+                    </div>
+                    <div class="col-span-1 overflow-hidden rounded-xl group relative interactive scroll-animate" style="height: 14.5rem;" data-delay="1.3">
+                        <img src="https://placehold.co/600x400/dd6b20/ffffff?text=Rural+Landscape" alt="Rural Landscape" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-500"/>
+                        <div class="absolute inset-0 bg-primary-nalikera bg-opacity-0 group-hover:bg-opacity-30 transition duration-500 flex items-center justify-center">
+                            <i class="fas fa-camera text-white text-3xl opacity-0 group-hover:opacity-100 transition duration-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Customer Stats Section (Dark Green/Black Background - Maintained Original Structure) -->
+        <section id="customer-stats" class="py-24 bg-dark-nalikera overflow-hidden">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex flex-wrap justify-center items-center -mx-4">
+                    <!-- Stat 1: 10k Workers -->
+                    <div class="w-1/2 lg:w-1/4 px-4 mb-8 lg:mb-0 text-center text-white scroll-animate" data-delay="0.1">
+                        <div class="text-5xl md:text-6xl font-extrabold mb-2" data-target="10" data-prefix="" data-suffix="k">0</div>
+                        <p class="text-lg font-medium">Verified Workers on Our Platform</p>
+                    </div>
+                    <!-- Stat 2: 178 Cities -->
+                    <div class="w-1/2 lg:w-1/4 px-4 mb-8 lg:mb-0 text-center text-white scroll-animate" data-delay="0.2">
+                        <div class="text-5xl md:text-6xl font-extrabold mb-2" data-target="178" data-prefix="">0</div>
+                        <p class="text-lg font-medium">Cities/Villages We Serve</p>
+                    </div>
+                    <!-- Stat 3: 24M Coconuts (Changed to Total Tasks) -->
+                    <div class="w-1/2 lg:w-1/4 px-4 mb-8 lg:mb-0 text-center text-white scroll-animate" data-delay="0.3">
+                        <div class="text-5xl md:text-6xl font-extrabold mb-2" data-target="24" data-prefix="" data-suffix="M">0</div>
+                        <p class="text-lg font-medium">Total Tasks Completed Successfully</p>
+                    </div>
+                    <!-- Stat 4: 125 Projects (Changed to Average Rating) -->
+                    <div class="w-1/2 lg:w-1/4 px-4 mb-8 lg:mb-0 text-center text-white scroll-animate" data-delay="0.4">
+                        <div class="text-5xl md:text-6xl font-extrabold mb-2" data-target="49" data-prefix="" data-suffix="*">0</div>
+                        <p class="text-lg font-medium">Average Worker Rating (Out of 5)</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tour Guide Section (Now: Our Featured Workers) -->
+        <section id="tour-guide" class="py-24 bg-gray-50 overflow-hidden">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <p class="text-primary-nalikera font-semibold mb-2 scroll-animate" data-delay="0.1"><i class="fas fa-medal mr-2"></i> Our Top Talent</p>
+                <h2 class="text-4xl font-extrabold mb-4 text-dark-text scroll-animate" data-delay="0.2">Featured 5-Star Workers</h2>
+                <p class="text-gray-500 max-w-2xl mx-auto mb-16 scroll-animate" data-delay="0.3">Book highly-rated, experienced professionals instantly for any urgent requirement.</p>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+                    <!-- Worker Card 1 -->
+                    <div class="flex flex-col items-center scroll-animate" data-delay="0.4">
+                        <img src="https://placehold.co/150x150/d53f8c/ffffff?text=Rajan" alt="Rajan" class="w-36 h-36 rounded-full object-cover mb-4 shadow-lg"/>
+                        <h3 class="text-xl font-bold text-dark-text">Rajan V.</h3>
+                        <p class="text-primary-nalikera mb-3">Master Climber</p>
+                        <div class="flex space-x-3 text-gray-500">
+                            <a href="#" class="hover:text-primary-nalikera interactive"><i class="fas fa-star text-accent-gold"></i> 5.0</a>
+                            <a href="#" class="hover:text-primary-nalikera interactive"><i class="fas fa-tasks"></i> 80+ Jobs</a>
+                        </div>
+                    </div>
+                    <!-- Worker Card 2 -->
+                    <div class="flex flex-col items-center scroll-animate" data-delay="0.5">
+                        <img src="https://placehold.co/150x150/805ad5/ffffff?text=Asha" alt="Asha" class="w-36 h-36 rounded-full object-cover mb-4 shadow-lg"/>
+                        <h3 class="text-xl font-bold text-dark-text">Asha K.</h3>
+                        <p class="text-primary-nalikera mb-3">Jackfruit Specialist</p>
+                        <div class="flex space-x-3 text-gray-500">
+                            <a href="#" class="hover:text-primary-nalikera interactive"><i class="fas fa-star text-accent-gold"></i> 4.9</a>
+                            <a href="#" class="hover:text-primary-nalikera interactive"><i class="fas fa-tasks"></i> 55+ Jobs</a>
+                        </div>
+                    </div>
+                    <!-- Worker Card 3 -->
+                    <div class="flex flex-col items-center scroll-animate" data-delay="0.6">
+                        <img src="https://placehold.co/150x150/2d3748/ffffff?text=George" alt="George" class="w-36 h-36 rounded-full object-cover mb-4 shadow-lg"/>
+                        <h3 class="text-xl font-bold text-dark-text">George P.</h3>
+                        <p class="text-primary-nalikera mb-3">Areca & Cashew Expert</p>
+                        <div class="flex space-x-3 text-gray-500">
+                            <a href="#" class="hover:text-primary-nalikera interactive"><i class="fas fa-star text-accent-gold"></i> 4.7</a>
+                            <a href="#" class="hover:text-primary-nalikera interactive"><i class="fas fa-tasks"></i> 100+ Jobs</a>
+                        </div>
+                    </div>
+                    <!-- Worker Card 4 -->
+                    <div class="flex flex-col items-center scroll-animate" data-delay="0.7">
+                        <img src="https://placehold.co/150x150/1d8c7c/ffffff?text=Leela" alt="Leela" class="w-36 h-36 rounded-full object-cover mb-4 shadow-lg"/>
+                        <h3 class="text-xl font-bold text-dark-text">Leela M.</h3>
+                        <p class="text-primary-nalikera mb-3">Mango Picker</p>
+                        <div class="flex space-x-3 text-gray-500">
+                            <a href="#" class="hover:text-primary-nalikera interactive"><i class="fas fa-star text-accent-gold"></i> 4.9</a>
+                            <a href="#" class="hover:text-primary-nalikera interactive"><i class="fas fa-tasks"></i> 95+ Jobs</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Testimonial Section (Maintained Original Structure) -->
+        <section id="testimonial" class="py-24 bg-white relative overflow-hidden">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="lg:flex lg:items-center lg:space-x-12">
+                    <!-- Left Column: Image Collage -->
+                    <div class="lg:w-1/2 relative h-[400px] mb-12 lg:mb-0 scroll-animate slide-left" data-delay="0.1">
+                        <!-- Background Shapes/Doodles -->
+                        <div class="absolute w-24 h-24 rounded-full bg-primary-nalikera opacity-10 top-0 left-0"></div>
+                        <div class="absolute w-12 h-12 rounded-full bg-dark-nalikera opacity-10 bottom-0 right-0"></div>
+                        
+                        <!-- Image 1 (Top Left) -->
+                        <img src="https://placehold.co/150x180/38b2ac/ffffff?text=Farm+Owner" alt="Farm Owner" class="absolute top-0 left-10 w-36 h-44 object-cover rounded-xl shadow-xl transform rotate-3"/>
+                        <!-- Image 2 (Middle) -->
+                        <img src="https://placehold.co/200x250/1d8c7c/ffffff?text=Safe+Climbing" alt="Safe Climbing" class="absolute top-1/2 left-1/2 w-48 h-60 object-cover rounded-xl shadow-xl transform -translate-x-1/2 -translate-y-1/2 -rotate-2"/>
+                        <!-- Image 3 (Bottom Right) -->
+                        <img src="https://placehold.co/150x180/4fd1c5/ffffff?text=Harvest+Yield" alt="Harvest Yield" class="absolute bottom-0 right-10 w-36 h-44 object-cover rounded-xl shadow-xl transform rotate-5"/>
+                    </div>
+
+                    <!-- Right Column: Quote -->
+                    <div class="lg:w-1/2 scroll-animate" data-delay="0.3">
+                        <div class="text-6xl text-primary-nalikera font-extrabold mb-4">66</div>
+                        <blockquote class="text-3xl font-medium text-dark-text italic mb-8">
+                            Nalikera.com's workers were punctual, used proper safety gear, and completed my coconut harvest faster than I expected. Excellent service!
+                        </blockquote>
+                        <p class="text-xl font-bold text-dark-text">- Thomas Kurian</p>
+                        <p class="text-gray-500">Local Farmer, Kottayam</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Trusted By Section (Maintained Original Structure) -->
+        <section id="trusted-by" class="py-12 bg-primary-nalikera overflow-hidden">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <p class="text-white font-semibold mb-8 scroll-animate" data-delay="0.1">Trusted by 300K+ homeowners and farmers</p>
+                <div class="flex flex-wrap justify-center items-center space-x-8 md:space-x-16 scroll-animate" data-delay="0.2">
+                    <!-- Logos - using text/icons as placeholders -->
+                    <div class="text-white text-3xl font-bold hover:text-gray-200 transition duration-200 interactive">Kerala Govt</div>
+                    <div class="text-white text-3xl font-bold hover:text-gray-200 transition duration-200 interactive">Farmers Coop</div>
+                    <div class="text-white text-3xl font-bold hover:text-gray-200 transition duration-200 interactive">ICAR</div>
+                    <div class="text-white text-3xl font-bold hover:text-gray-200 transition duration-200 interactive">NABARD</div>
+                    <div class="text-white text-3xl font-bold hover:text-gray-200 transition duration-200 interactive"><i class="fas fa-leaf mr-2"></i>AgriTech</div>
+                    <div class="text-white text-3xl font-bold hover:text-gray-200 transition duration-200 interactive"><i class="fas fa-map-marked-alt mr-2"></i>Local Councils</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Latest Blog Post & Newsletter Section (Maintained Original Structure) -->
+        <section id="blog-newsletter" class="pt-24 pb-12 bg-gray-50 overflow-hidden">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <!-- Blog Header -->
+                <div class="text-center mb-16">
+                    <p class="text-primary-nalikera font-semibold mb-2 scroll-animate" data-delay="0.1"><i class="fas fa-newspaper mr-2"></i> Farm Insights</p>
+                    <h2 class="text-4xl font-extrabold mb-4 text-dark-text scroll-animate" data-delay="0.2">Latest News & Tips</h2>
+                    <p class="text-gray-500 max-w-2xl mx-auto scroll-animate" data-delay="0.3">Stay informed on seasonal harvesting, market trends, and worker safety tips.</p>
+                </div>
+
+                <!-- Blog Posts -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
+                    <!-- Blog Card 1 -->
+                    <div class="bg-white rounded-xl shadow-lg hover:shadow-2xl transition duration-300 overflow-hidden group scroll-animate" data-delay="0.4">
+                        <img src="https://placehold.co/600x400/2a4365/ffffff?text=Coconut+Tips" alt="Coconut Tips" class="w-full h-48 object-cover group-hover:scale-105 transition duration-500"/>
+                        <div class="p-6">
+                            <h3 class="text-xl font-semibold mb-3 hover:text-primary-nalikera transition duration-200 interactive">Seasonal Coconut Health Check</h3>
+                            <p class="text-gray-500 text-sm mb-4">Learn the best time to hire a climber for optimal yield and tree health.</p>
+                            <div class="flex justify-between text-xs text-gray-400">
+                                <span><i class="fas fa-calendar-alt mr-1"></i> 10 Oct, 2025</span>
+                                <span><i class="fas fa-comment-dots mr-1"></i> 5 Comments</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Blog Card 2 -->
+                    <div class="bg-white rounded-xl shadow-lg hover:shadow-2xl transition duration-300 overflow-hidden group scroll-animate" data-delay="0.5">
+                        <img src="https://placehold.co/600x400/1d8c7c/ffffff?text=Mango+Market" alt="Mango Market" class="w-full h-48 object-cover group-hover:scale-105 transition duration-500"/>
+                        <div class="p-6">
+                            <h3 class="text-xl font-semibold mb-3 hover:text-primary-nalikera transition duration-200 interactive">The Mango Market Outlook 2026</h3>
+                            <p class="text-gray-500 text-sm mb-4">Price projections and optimal picking schedules for the upcoming mango season.</p>
+                            <div class="flex justify-between text-xs text-gray-400">
+                                <span><i class="fas fa-calendar-alt mr-1"></i> 05 Oct, 2025</span>
+                                <span><i class="fas fa-comment-dots mr-1"></i> 2 Comments</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Blog Card 3 -->
+                    <div class="bg-white rounded-xl shadow-lg hover:shadow-2xl transition duration-300 overflow-hidden group scroll-animate" data-delay="0.6">
+                        <img src="https://placehold.co/600x400/38b2ac/ffffff?text=Safety+Gear" alt="Safety Gear" class="w-full h-48 object-cover group-hover:scale-105 transition duration-500"/>
+                        <div class="p-6">
+                            <h3 class="text-xl font-semibold mb-3 hover:text-primary-nalikera transition duration-200 interactive">New Safety Standards for Climbers</h3>
+                            <p class="text-gray-500 text-sm mb-4">What Nalikera is doing to ensure the highest level of worker safety on your property.</p>
+                            <div class="flex justify-between text-xs text-gray-400">
+                                <span><i class="fas fa-calendar-alt mr-1"></i> 01 Oct, 2025</span>
+                                <span><i class="fas fa-comment-dots mr-1"></i> 8 Comments</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Newsletter Signup -->
+                <div class="bg-white p-8 md:p-12 rounded-2xl shadow-xl flex flex-col lg:flex-row justify-between items-center scroll-animate" data-delay="0.7">
+                    <h2 class="text-3xl font-extrabold mb-4 lg:mb-0 text-dark-text">Subscribe for Farm Insights & Worker Offers</h2>
+                    <div class="flex w-full lg:w-1/2 space-x-4">
+                        <input type="email" placeholder="Enter email address" class="w-full p-3 border border-gray-300 rounded-xl focus:ring-primary-nalikera focus:border-primary-nalikera transition duration-200"/>
+                        <button class="flex-shrink-0 px-6 py-3 bg-primary-nalikera text-white font-semibold rounded-xl hover:bg-dark-nalikera transition duration-300 interactive">
+                            Subscribe
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer (Maintained Original Structure) -->
+    <footer class="bg-dark-nalikera text-white pt-20 pb-8 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-12 border-b border-white border-opacity-20 pb-12 mb-8">
+                <!-- Nalikera.com Info -->
+                <div class="col-span-2 md:col-span-1">
+                    <div class="text-3xl font-extrabold tracking-tight mb-4">
+                        <span class="logo-gradient">Nalikera.com</span>
+                    </div>
+                    <p class="text-gray-300 text-sm mb-4">Your trusted partner for agricultural labor services, specializing in tropical fruit harvesting.</p>
+                    <div class="flex space-x-4 text-gray-300">
+                        <a href="#" class="hover:text-accent-gold interactive"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="hover:text-accent-gold interactive"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="hover:text-accent-gold interactive"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="hover:text-accent-gold interactive"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+
+                <!-- Service Links -->
+                <div>
+                    <h4 class="text-xl font-semibold mb-4">Our Services</h4>
+                    <ul class="space-y-2 text-sm text-gray-300">
+                        <li><a href="#" class="hover:text-accent-gold transition duration-200 interactive">Coconut Climbing</a></li>
+                        <li><a href="#" class="hover:text-accent-gold transition duration-200 interactive">Jackfruit Cutting</a></li>
+                        <li><a href="#" class="hover:text-accent-gold transition duration-200 interactive">Mango Picking</a></li>
+                        <li><a href="#" class="hover:text-accent-gold transition duration-200 interactive">Areca Nut Collection</a></li>
+                        <li><a href="#" class="hover:text-accent-gold transition duration-200 interactive">Cashew Collection</a></li>
+                    </ul>
+                </div>
+
+                <!-- Legal -->
+                <div>
+                    <h4 class="text-xl font-semibold mb-4">Company</h4>
+                    <ul class="space-y-2 text-sm text-gray-300">
+                        <li><a href="#" class="hover:text-accent-gold transition duration-200 interactive">How it Works</a></li>
+                        <li><a href="#" class="hover:text-accent-gold transition duration-200 interactive">Safety & Insurance</a></li>
+                        <li><a href="#" class="hover:text-accent-gold transition duration-200 interactive">Privacy Policy</a></li>
+                        <li><a href="#" class="hover:text-accent-gold transition duration-200 interactive">Worker Login</a></li>
+                    </ul>
+                </div>
+
+                <!-- Gallery (Now: Harvest Gallery) -->
+                <div>
+                    <h4 class="text-xl font-semibold mb-4">Harvest Gallery</h4>
+                    <div class="grid grid-cols-3 gap-2">
+                        <img src="https://placehold.co/80x80/38b2ac/ffffff?text=C1" alt="Gallery" class="w-full h-auto object-cover rounded-md interactive hover:opacity-75 transition duration-200"/>
+                        <img src="https://placehold.co/80x80/1d8c7c/ffffff?text=C2" alt="Gallery" class="w-full h-auto object-cover rounded-md interactive hover:opacity-75 transition duration-200"/>
+                        <img src="https://placehold.co/80x80/f59e0b/ffffff?text=J1" alt="Gallery" class="w-full h-auto object-cover rounded-md interactive hover:opacity-75 transition duration-200"/>
+                        <img src="https://placehold.co/80x80/2a4365/ffffff?text=M1" alt="Gallery" class="w-full h-auto object-cover rounded-md interactive hover:opacity-75 transition duration-200"/>
+                        <img src="https://placehold.co/80x80/805ad5/ffffff?text=A1" alt="Gallery" class="w-full h-auto object-cover rounded-md interactive hover:opacity-75 transition duration-200"/>
+                        <img src="https://placehold.co/80x80/dd6b20/ffffff?text=K1" alt="Gallery" class="w-full h-auto object-cover rounded-md interactive hover:opacity-75 transition duration-200"/>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Copyright -->
+            <div class="text-center text-sm text-gray-400 pt-4">
+                © Copyright 2025 by Nalikera.com. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- 1. Custom Mouse Follower Logic (UPDATED ANIMATION) ---
+            const cursorFollower = document.getElementById('cursor-follower');
+            document.addEventListener('mousemove', (e) => {
+                cursorFollower.style.left = `${e.clientX}px`;
+                cursorFollower.style.top = `${e.clientY}px`;
+            });
+            // Hide custom cursor when mouse leaves the document
+            document.addEventListener('mouseleave', () => {
+                cursorFollower.style.opacity = '0';
+            });
+            document.addEventListener('mouseenter', () => {
+                cursorFollower.style.opacity = '1';
+            });
+
+            // --- 2. Booking Form Dropdown Logic (MAINTAINED) ---
+            window.toggleDropdown = (element) => {
+                const dropdown = element.closest('.relative').querySelector('[data-dropdown="true"]');
+                const chevron = element.querySelector('i.fa-chevron-down');
+                
+                // Close others
+                document.querySelectorAll('[data-dropdown="true"]').forEach(dd => {
+                    if (dd !== dropdown) {
+                        dd.classList.add('hidden');
+                        const otherChevron = dd.closest('.relative').querySelector('i.fa-chevron-down');
+                        if (otherChevron) otherChevron.classList.remove('rotate-180');
+                    }
+                });
+
+                dropdown.classList.toggle('hidden');
+                if (chevron) chevron.classList.toggle('rotate-180');
+            }
+
+            window.selectOption = (link, targetPrefix) => {
+                const dropdownContainer = link.closest('[data-dropdown="true"]');
+                const textElement = dropdownContainer.closest('.relative').querySelector(`#${targetPrefix}-text`);
+                
+                if (textElement) {
+                    textElement.textContent = link.textContent;
+                }
+                
+                dropdownContainer.classList.add('hidden');
+                dropdownContainer.closest('.relative').querySelector('i.fa-chevron-down').classList.remove('rotate-180');
+                
+                // Prevent navigation
+                return false; 
+            }
+
+            // Close all dropdowns when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.relative.group') || e.target.closest('a')) {
+                    document.querySelectorAll('[data-dropdown="true"]').forEach(dd => {
+                        dd.classList.add('hidden');
+                        const chevron = dd.closest('.relative').querySelector('i.fa-chevron-down');
+                        if (chevron) chevron.classList.remove('rotate-180');
+                    });
+                }
+            });
+
+
+            // --- 3. Number Counter Animation Logic (MAINTAINED STRUCTURE, TEXT UPDATED) ---
+            const counterElements = document.querySelectorAll('.text-5xl[data-target], .text-6xl[data-target]');
+            
+            const countUp = (el, target, duration, prefix = '', suffix = '') => {
+                const start = 0;
+                let startTime = null;
+                const step = (timestamp) => {
+                    if (!startTime) startTime = timestamp;
+                    const progress = timestamp - startTime;
+                    const percentage = Math.min(progress / duration, 1);
+                    let value = percentage * target;
+
+                    let displayValue;
+                    if (suffix === 'k') {
+                        displayValue = (value / 10).toFixed(0); // 10k -> counts to 10
+                    } else if (suffix === 'M') {
+                        displayValue = value.toFixed(0); // 24M -> counts to 24
+                    } else if (suffix === '*') {
+                        displayValue = (Math.round(value) / 10).toFixed(1); // 4.9 -> counts to 49/10
+                    } else {
+                        displayValue = Math.floor(value);
+                    }
+
+                    el.textContent = `${prefix}${displayValue.toLocaleString()}${suffix}`;
+                    if (percentage < 1) {
+                        window.requestAnimationFrame(step);
+                    }
+                };
+                window.requestAnimationFrame(step);
+            };
+
+            const counterObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const el = entry.target;
+                        // For 4.9, target is 49. For 10k, target is 10000. For 24M, target is 24.
+                        const target = parseFloat(el.getAttribute('data-target')); 
+                        const prefix = el.getAttribute('data-prefix') || '';
+                        const suffix = el.getAttribute('data-suffix') || '';
+                        
+                        countUp(el, target, 1500, prefix, suffix); 
+                        observer.unobserve(el);
+                    }
+                });
+            }, { threshold: 0.5 });
+
+            counterElements.forEach(el => counterObserver.observe(el));
+
+
+            // --- 4. Scroll Reveal Animations (MAINTAINED) ---
+            const animateElements = document.querySelectorAll('.scroll-animate');
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const delay = parseFloat(entry.target.getAttribute('data-delay')) || 0;
+                        
+                        entry.target.style.transitionDelay = `${delay}s`; 
+                        entry.target.classList.add('is-visible');
+                        
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+            animateElements.forEach(el => observer.observe(el));
+        });
+    </script>
+</body>
+</html>
