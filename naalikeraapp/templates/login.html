@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Nalikera.com</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        :root {
+            --color-primary: #1d8c7c; /* Dark Tropical Green (Nalikera/Coconut Theme) */
+            --color-dark: #125c50; /* Deep Green */
+            --color-text: #1a202c; /* Dark Text */
+            --color-accent: #f59e0b; /* Golden Yellow for highlights/cursor */
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border-radius: 20px;
+        }
+
+        .glow-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .glow-input:focus {
+            box-shadow: 0 0 20px rgba(29, 140, 124, 0.5);
+            border-color: var(--color-primary);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .glow-button {
+            background: linear-gradient(45deg, var(--color-primary), var(--color-dark));
+            box-shadow: 0 4px 15px rgba(29, 140, 124, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .glow-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(29, 140, 124, 0.6);
+        }
+
+        .floating-label {
+            position: relative;
+        }
+
+        .floating-label input {
+            padding-top: 20px;
+            padding-bottom: 10px;
+        }
+
+        .floating-label label {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+                .floating-label input:focus + label,
+        .floating-label input:not(:placeholder-shown) + label {
+            top: 4px;
+            font-size: 12px;
+            color: var(--color-accent);
+        }
+
+        /* Particle animation */
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: float 6s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center overflow-hidden">
+    <!-- Particles -->
+    <div class="absolute inset-0 overflow-hidden">
+        <div class="particle" style="left: 10%; animation-delay: 0s;"></div>
+        <div class="particle" style="left: 20%; animation-delay: 1s;"></div>
+        <div class="particle" style="left: 30%; animation-delay: 2s;"></div>
+        <div class="particle" style="left: 40%; animation-delay: 3s;"></div>
+        <div class="particle" style="left: 50%; animation-delay: 4s;"></div>
+        <div class="particle" style="left: 60%; animation-delay: 5s;"></div>
+        <div class="particle" style="left: 70%; animation-delay: 6s;"></div>
+        <div class="particle" style="left: 80%; animation-delay: 7s;"></div>
+        <div class="particle" style="left: 90%; animation-delay: 8s;"></div>
+    </div>
+    </style>
+    <script>
+        // Set up Tailwind configuration dynamically for custom colors
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-nalikera': 'var(--color-primary)',
+                        'dark-nalikera': 'var(--color-dark)',
+                        'accent-gold': 'var(--color-accent)',
+                        'dark-text': 'var(--color-text)',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen flex items-center justify-center">
+    <div class="max-w-md w-full glass-card p-8 rounded-2xl">
+        <div class="text-center mb-8">
+            <h2 class="text-3xl font-bold text-white mb-2">Welcome Back</h2>
+            <p class="text-gray-300">Sign in to your Nalikera account</p>
+        </div>
+        <form id="loginForm" class="space-y-6">
+            <div class="floating-label">
+                <input type="text" id="username" placeholder=" " required class="glow-input w-full px-4 py-3 rounded-lg text-white placeholder-transparent">
+                <label class="text-sm">Username</label>
+            </div>
+            <div class="floating-label">
+                <input type="password" id="password" placeholder=" " required class="glow-input w-full px-4 py-3 rounded-lg text-white placeholder-transparent">
+                <label class="text-sm">Password</label>
+            </div>
+            <button type="submit" class="glow-button w-full text-white py-3 px-4 rounded-lg font-semibold">Sign In</button>
+        </form>
+        <div class="mt-8 text-center">
+            <p class="text-gray-300 mb-4">Don't have an account?</p>
+            <div class="space-y-2">
+                <a href="/signup/buyer/" class="block glow-button text-white py-2 px-4 rounded-lg font-semibold text-center">Sign Up as User</a>
+                <a href="/signup/worker/" class="block glow-button text-white py-2 px-4 rounded-lg font-semibold text-center" style="background: linear-gradient(45deg, #3b82f6, #1e40af); box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);">Sign Up as Worker</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://127.0.0.1:8000/api/auth';
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch(`${API_BASE}/login/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    localStorage.setItem('access_token', data.tokens.access);
+                    localStorage.setItem('refresh_token', data.tokens.refresh);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+
+                    // Check if phone verification is needed
+                    if (data.user.phone && !data.user.is_phone_verified) {
+                        alert('Please verify your mobile number. OTP has been sent.');
+                        // Redirect to a verification page or show form
+                        window.location.href = '/verify-otp/';
+                    } else {
+                        window.location.href = '/nal/';
+                    }
+                } else {
+                    alert('Login failed: ' + JSON.stringify(data));
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        });
+    </script>
+</body>
+</html>

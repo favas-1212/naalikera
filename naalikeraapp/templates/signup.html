@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Nalikera.com</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        :root {
+            --color-primary: #1d8c7c; /* Dark Tropical Green (Nalikera/Coconut Theme) */
+            --color-dark: #125c50; /* Deep Green */
+            --color-text: #1a202c; /* Dark Text */
+            --color-accent: #f59e0b; /* Golden Yellow for highlights/cursor */
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border-radius: 20px;
+        }
+
+        .glow-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .glow-input:focus {
+            box-shadow: 0 0 20px rgba(29, 140, 124, 0.5);
+            border-color: var(--color-primary);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .glow-button {
+            background: linear-gradient(45deg, var(--color-primary), var(--color-dark));
+            box-shadow: 0 4px 15px rgba(29, 140, 124, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .glow-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(29, 140, 124, 0.6);
+        }
+
+        .floating-label {
+            position: relative;
+        }
+
+        .floating-label input {
+            padding-top: 20px;
+            padding-bottom: 10px;
+        }
+
+        .floating-label label {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+                .floating-label input:focus + label,
+        .floating-label input:not(:placeholder-shown) + label {
+            top: 4px;
+            font-size: 12px;
+            color: var(--color-accent);
+        }
+
+        /* Particle animation */
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: float 6s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center overflow-hidden">
+    <!-- Particles -->
+    <div class="absolute inset-0 overflow-hidden">
+        <div class="particle" style="left: 10%; animation-delay: 0s;"></div>
+        <div class="particle" style="left: 20%; animation-delay: 1s;"></div>
+        <div class="particle" style="left: 30%; animation-delay: 2s;"></div>
+        <div class="particle" style="left: 40%; animation-delay: 3s;"></div>
+        <div class="particle" style="left: 50%; animation-delay: 4s;"></div>
+        <div class="particle" style="left: 60%; animation-delay: 5s;"></div>
+        <div class="particle" style="left: 70%; animation-delay: 6s;"></div>
+        <div class="particle" style="left: 80%; animation-delay: 7s;"></div>
+        <div class="particle" style="left: 90%; animation-delay: 8s;"></div>
+    </div>
+    </style>
+    <script>
+        // Set up Tailwind configuration dynamically for custom colors
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-nalikera': 'var(--color-primary)',
+                        'dark-nalikera': 'var(--color-dark)',
+                        'accent-gold': 'var(--color-accent)',
+                        'dark-text': 'var(--color-text)',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen flex items-center justify-center">
+    <div class="max-w-md w-full glass-card p-8 rounded-2xl">
+        <div class="text-center mb-8">
+            <h2 class="text-3xl font-bold text-white mb-2">Join Nalikera</h2>
+            <p class="text-gray-300">Create your account as {{ user_type|title }}</p>
+        </div>
+        <form id="signupForm" class="space-y-6">
+            <input type="hidden" id="user_type" value="{{ user_type }}">
+            <div class="floating-label">
+                <input type="text" id="username" placeholder=" " required class="glow-input w-full px-4 py-3 rounded-lg text-white placeholder-transparent">
+                <label class="text-sm">Username</label>
+            </div>
+            <div class="floating-label">
+                <input type="email" id="email" placeholder=" " required class="glow-input w-full px-4 py-3 rounded-lg text-white placeholder-transparent">
+                <label class="text-sm">Email</label>
+            </div>
+            <div class="floating-label">
+                <input type="text" id="phone" placeholder=" " required class="glow-input w-full px-4 py-3 rounded-lg text-white placeholder-transparent">
+                <label class="text-sm">Phone (e.g. +1234567890)</label>
+            </div>
+            <div class="floating-label">
+                <input type="password" id="password" placeholder=" " required class="glow-input w-full px-4 py-3 rounded-lg text-white placeholder-transparent">
+                <label class="text-sm">Password</label>
+            </div>
+            <button type="submit" class="glow-button w-full text-white py-3 px-4 rounded-lg font-semibold">Sign Up</button>
+        </form>
+        <div class="mt-8 text-center">
+            <p class="text-gray-300">Already have an account? <a href="/login/" class="text-white hover:text-yellow-300 underline">Sign In</a></p>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://127.0.0.1:8000/api/auth';
+
+        document.getElementById('signupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                username: document.getElementById('username').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                password: document.getElementById('password').value,
+                user_type: document.getElementById('user_type').value
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/register/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    localStorage.setItem('access_token', result.tokens.access);
+                    localStorage.setItem('refresh_token', result.tokens.refresh);
+                    localStorage.setItem('user', JSON.stringify(result.user));
+                    alert(result.message || 'Registration successful! Please verify your phone.');
+                    window.location.href = '/verify-otp/';
+                } else {
+                    // Parse errors user-friendly
+                    let errorMsg = 'Registration failed:\n';
+                    if (result.username) {
+                        errorMsg += 'Username: ' + result.username.join(', ') + '\n';
+                    }
+                    if (result.email) {
+                        errorMsg += 'Email: ' + result.email.join(', ') + '\n';
+                    }
+                    if (result.phone) {
+                        errorMsg += 'Phone: ' + result.phone.join(', ') + '\n';
+                    }
+                    if (result.password) {
+                        errorMsg += 'Password: ' + result.password.join(', ') + '\n';
+                    }
+                    if (result.user_type) {
+                        errorMsg += 'User Type: ' + result.user_type.join(', ') + '\n';
+                    }
+                    if (!result.username && !result.email && !result.phone && !result.password && !result.user_type) {
+                        errorMsg += JSON.stringify(result);
+                    }
+                    alert(errorMsg);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        });
+    </script>
+</body>
+</html>

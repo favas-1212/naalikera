@@ -194,10 +194,26 @@
                     <a href="#" class="text-gray-600 hover:text-primary-nalikera font-medium interactive">Contact</a>
                 </nav>
                 <!-- CTA Button (Desktop) -->
-                <div class="hidden md:block">
-                    <button class="px-6 py-2 bg-primary-nalikera text-white font-semibold rounded-full hover:bg-dark-nalikera transition duration-300 shadow-lg interactive">
-                        Hire Now
-                    </button>
+                <div class="hidden md:block space-x-4">
+                    <div id="authButtons">
+                        <button id="hireNowBtn" class="px-6 py-2 bg-primary-nalikera text-white font-semibold rounded-full hover:bg-dark-nalikera transition duration-300 shadow-lg interactive">
+                            Hire Now
+                        </button>
+                        <a href="/login/" class="px-6 py-2 bg-white text-primary-nalikera font-semibold rounded-full border border-primary-nalikera hover:bg-primary-nalikera hover:text-white transition duration-300 shadow-lg interactive">
+                            Sign In
+                        </a>
+                    </div>
+                    <div id="userMenu" class="hidden relative">
+                        <button id="userDropdownBtn" class="px-6 py-2 bg-primary-nalikera text-white font-semibold rounded-full hover:bg-dark-nalikera transition duration-300 shadow-lg interactive flex items-center">
+                            <span id="userName">User</span>
+                            <i class="fas fa-chevron-down ml-2"></i>
+                        </button>
+                        <div id="userDropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl z-20 hidden">
+                            <a href="#" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
+                            <a href="#" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
+                            <a href="#" id="logoutBtn" class="block px-4 py-3 text-sm text-red-600 hover:bg-gray-100">Logout</a>
+                        </div>
+                    </div>
                 </div>
                 <!-- Mobile Menu Button (Hamburger) -->
                 <div class="md:hidden">
@@ -293,7 +309,7 @@
 
                         <!-- Search Button -->
                         <div class="flex items-end">
-                            <button class="w-full h-[52px] bg-primary-nalikera text-white font-semibold rounded-xl hover:bg-dark-nalikera transition duration-300 shadow-lg interactive">
+                            <button id="findWorkersBtn" class="w-full h-[52px] bg-primary-nalikera text-white font-semibold rounded-xl hover:bg-dark-nalikera transition duration-300 shadow-lg interactive">
                                 Find Workers
                             </button>
                         </div>
@@ -932,6 +948,90 @@
             }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
 
             animateElements.forEach(el => observer.observe(el));
+        });
+
+        // Authentication check
+        function isAuthenticated() {
+            const token = localStorage.getItem('access_token');
+            return token && token !== 'null' && token !== 'undefined';
+        }
+
+        function checkAuth() {
+            if (!isAuthenticated()) {
+                window.location.href = '/login/';
+                return false;
+            }
+            return true;
+        }
+
+        // Update UI based on authentication status
+        function updateAuthUI() {
+            const authButtons = document.getElementById('authButtons');
+            const userMenu = document.getElementById('userMenu');
+            const userNameSpan = document.getElementById('userName');
+
+            if (isAuthenticated()) {
+                // User is logged in - hide auth buttons, show user menu
+                authButtons.classList.add('hidden');
+                userMenu.classList.remove('hidden');
+
+                // Set user name if available in localStorage
+                const userName = localStorage.getItem('user_name') || 'User';
+                userNameSpan.textContent = userName;
+            } else {
+                // User is not logged in - show auth buttons, hide user menu
+                authButtons.classList.remove('hidden');
+                userMenu.classList.add('hidden');
+            }
+        }
+
+        // Handle user dropdown toggle
+        document.getElementById('userDropdownBtn').addEventListener('click', function() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('hidden');
+        });
+
+        // Handle logout
+        document.getElementById('logoutBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            localStorage.removeItem('user_name');
+            updateAuthUI();
+            window.location.reload(); // Refresh to update UI
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            const userMenu = document.getElementById('userMenu');
+            const dropdown = document.getElementById('userDropdown');
+            if (!userMenu.contains(e.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+
+        // Initialize UI on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateAuthUI();
+        });
+
+        document.getElementById('findWorkersBtn').addEventListener('click', function(e) {
+            if (!checkAuth()) {
+                e.preventDefault();
+            } else {
+                // Proceed with finding workers
+                alert('Finding workers... (implement search logic here)');
+            }
+        });
+
+        document.getElementById('hireNowBtn').addEventListener('click', function(e) {
+            if (!checkAuth()) {
+                e.preventDefault();
+                window.location.href = '/login/';
+            } else {
+                // Proceed with hiring
+                alert('Hiring now... (implement hire logic here)');
+            }
         });
     </script>
 </body>
