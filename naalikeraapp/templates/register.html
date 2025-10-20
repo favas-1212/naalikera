@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register on Nalikera.com</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" xintegrity="sha512-SnH5WK+bZxgPHs44uWIX+LLMDJzL31Y9WwQ68jW0XgfszK2fylsZcEJJ96t35p2b5v+tJ9j/Q+Bv2c4uD0z5uQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        /* Define custom colors and font for Tailwind */
+        :root {
+            --color-primary: #1d8c7c; /* Dark Tropical Green (Nalikera/Coconut Theme) */
+            --color-dark: #125c50; /* Deep Green */
+            --color-text: #1a202c; /* Dark Text */
+            --color-accent: #f59e0b; /* Golden Yellow for highlights/cursor */
+        }
+        
+        /* --- Custom Cursor Style & Animation (The Following Circle) --- */
+        @keyframes pulse-border {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        #cursor-follower {
+            position: fixed;
+            width: 30px;
+            height: 30px;
+            border: 3px solid var(--color-accent); /* Golden Yellow Circle */
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            /* The JS now sets left/top. We use translate to center it */
+            transform: translate(-50%, -50%); 
+            /* We only keep transitions for the hover effects (size/color), not the constant movement */
+            transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), border-color 0.2s, background-color 0.2s;
+            mix-blend-mode: normal; 
+            animation: pulse-border 2s infinite ease-in-out; 
+        }
+        
+        .interactive {
+            cursor: pointer;
+        }
+
+        .interactive:hover ~ #cursor-follower {
+            /* Enlarges and fills the circle with the primary color on interaction */
+            transform: translate(-50%, -50%) scale(2.5); 
+            background-color: var(--color-primary);
+            border-color: transparent;
+            animation: none; 
+        }
+
+        /* Scroll Reveal Animation Styles (for subtle loading effect) */
+        .scroll-animate {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+
+        .scroll-animate.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Custom gradient text for the logo */
+        .logo-gradient {
+            background-image: linear-gradient(to right, var(--color-primary), #48bb78);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+    </style>
+    <script>
+        // Set up Tailwind configuration dynamically for custom colors
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-nalikera': 'var(--color-primary)',
+                        'dark-nalikera': 'var(--color-dark)',
+                        'accent-gold': 'var(--color-accent)',
+                        'dark-text': 'var(--color-text)',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-sans text-dark-text min-h-screen bg-gray-50 flex flex-col items-center py-12 px-4">
+
+    <!-- Custom Mouse Follower -->
+    <div id="cursor-follower"></div>
+
+    <header class="w-full max-w-2xl mb-10 text-center scroll-animate" data-delay="0.1">
+        <!-- Logo - Matched to the main page design -->
+        <div class="text-4xl font-extrabold tracking-tight mb-2">
+            <span class="logo-gradient interactive">Nalikera.com</span>
+        </div>
+        <h1 class="text-3xl font-bold text-dark-text mt-4">
+            {% if user_type == 'customer' %}User Registration{% else %}Worker Registration{% endif %}
+        </h1>
+        <p class="text-gray-500 mt-2">
+            {% if user_type == 'customer' %}Join our platform to hire skilled workers.{% else %}Join our network of skilled agricultural professionals.{% endif %}
+        </p>
+    </header>
+
+    <!-- Registration Form Card -->
+    <div class="w-full max-w-2xl bg-white p-6 md:p-10 rounded-2xl shadow-xl border border-gray-100 scroll-animate" data-delay="0.3">
+        
+        <form id="registration-form" onsubmit="event.preventDefault(); showSuccessMessage();">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                <!-- 1. Name -->
+                <div class="col-span-1">
+                    <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                    <div class="flex items-center border border-gray-200 rounded-xl p-3 bg-white focus-within:border-primary-nalikera transition duration-200 interactive">
+                        <i class="fas fa-user text-gray-400 mr-3"></i>
+                        <input type="text" id="name" name="name" placeholder="Your full name" required class="w-full focus:outline-none placeholder-gray-400 text-sm"/>
+                    </div>
+                </div>
+
+                <!-- 2. Phone Number -->
+                <div class="col-span-1">
+                    <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                    <div class="flex items-center border border-gray-200 rounded-xl p-3 bg-white focus-within:border-primary-nalikera transition duration-200 interactive">
+                        <i class="fas fa-phone text-gray-400 mr-3"></i>
+                        <input type="tel" id="phone" name="phone" placeholder="e.g. 9876543210" pattern="[0-9]{10}" required class="w-full focus:outline-none placeholder-gray-400 text-sm"/>
+                    </div>
+                </div>
+
+                <!-- 3. Email -->
+                <div class="col-span-full">
+                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                    <div class="flex items-center border border-gray-200 rounded-xl p-3 bg-white focus-within:border-primary-nalikera transition duration-200 interactive">
+                        <i class="fas fa-envelope text-gray-400 mr-3"></i>
+                        <input type="email" id="email" name="email" placeholder="you@example.com" required class="w-full focus:outline-none placeholder-gray-400 text-sm"/>
+                    </div>
+                </div>
+
+                <!-- 4. Location (Village/Town) -->
+                <div class="col-span-1">
+                    <label for="location" class="block text-sm font-medium text-gray-700 mb-1">Local Location / Village</label>
+                    <div class="flex items-center border border-gray-200 rounded-xl p-3 bg-white focus-within:border-primary-nalikera transition duration-200 interactive">
+                        <i class="fas fa-map-pin text-gray-400 mr-3"></i>
+                        <input type="text" id="location" name="location" placeholder="Your village or town" required class="w-full focus:outline-none placeholder-gray-400 text-sm"/>
+                    </div>
+                </div>
+
+                <!-- 5. District (Dropdown for interactivity) -->
+                <div class="col-span-1 relative">
+                    <label for="district" class="block text-sm font-medium text-gray-700 mb-1">District</label>
+                    <div class="flex items-center border border-gray-200 rounded-xl p-3 bg-white focus-within:border-primary-nalikera transition duration-200 interactive">
+                        <i class="fas fa-city text-gray-400 mr-3"></i>
+                        <select id="district" name="district" required class="w-full focus:outline-none text-sm bg-transparent">
+                            <option value="" disabled selected>Select District</option>
+                            <option value="thiruvananthapuram">Thiruvananthapuram</option>
+                            <option value="kollam">Kollam</option>
+                            <option value="pathanamthitta">Pathanamthitta</option>
+                            <option value="alappuzha">Alappuzha</option>
+                            <option value="kottayam">Kottayam</option>
+                            <option value="idukki">Idukki</option>
+                            <option value="ernakulam">Ernakulam</option>
+                            <option value="thrissur">Thrissur</option>
+                            <option value="palakkad">Palakkad</option>
+                            <option value="malappuram">Malappuram</option>
+                            <option value="kozhikode">Kozhikode</option>
+                            <option value="wayanad">Wayanad</option>
+                            <option value="kannur">Kannur</option>
+                            <option value="kasaragod">Kasaragod</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 6. Address (Full Width) -->
+                <div class="col-span-full">
+                    <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Full Address</label>
+                    <div class="flex items-start border border-gray-200 rounded-xl p-3 bg-white focus-within:border-primary-nalikera transition duration-200 interactive">
+                        <i class="fas fa-home text-gray-400 mr-3 mt-1"></i>
+                        <textarea id="address" name="address" rows="3" placeholder="Street Address, Post Office, Pincode" required class="w-full focus:outline-none placeholder-gray-400 text-sm"></textarea>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="col-span-full pt-4">
+                    <button type="submit" class="w-full py-3 bg-primary-nalikera text-white font-semibold rounded-xl hover:bg-dark-nalikera transition duration-300 shadow-lg interactive text-lg">
+                        Submit Registration
+                        <i class="fas fa-arrow-right ml-2 transition-transform duration-300"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Success Message Modal (Custom Alert) -->
+    <div id="success-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-xl p-8 shadow-2xl max-w-sm text-center transform scale-90 transition-all duration-300" id="modal-content">
+            <div class="text-5xl text-primary-nalikera mb-4">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-2 text-dark-text">Registration Submitted!</h3>
+            <p class="text-gray-600 mb-6">Thank you for registering with Nalikera.com. We will contact you soon for verification.</p>
+            <button onclick="hideSuccessMessage()" class="px-6 py-2 bg-primary-nalikera text-white font-semibold rounded-full hover:bg-dark-nalikera transition duration-300 interactive">
+                Close
+            </button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            const cursorFollower = document.getElementById('cursor-follower');
+            
+            // --- 1. Smoother Custom Mouse Follower Logic using Lerp and rAF ---
+            let currentX = window.innerWidth / 2;
+            let currentY = window.innerHeight / 2;
+            let targetX = currentX;
+            let targetY = currentY;
+            const speed = 0.15; // Controls the lag/smoothness. Adjust this value (0.05 to 0.20) for feel.
+
+            // 1. Mousemove handler: only updates the target position
+            document.addEventListener('mousemove', (e) => {
+                targetX = e.clientX;
+                targetY = e.clientY;
+            });
+            
+            // 2. The Animation Loop (uses Lerp for smooth following)
+            function updateCursor() {
+                // Linear Interpolation (Lerp)
+                currentX += (targetX - currentX) * speed;
+                currentY += (targetY - currentY) * speed;
+
+                // Apply the position using left/top (translate(-50%, -50%) in CSS handles centering)
+                cursorFollower.style.left = `${currentX}px`;
+                cursorFollower.style.top = `${currentY}px`;
+
+                // Request the next frame
+                requestAnimationFrame(updateCursor);
+            }
+
+            // Initialize the loop
+            updateCursor();
+
+
+            // Hide custom cursor when mouse leaves the document
+            document.addEventListener('mouseleave', () => {
+                cursorFollower.style.opacity = '0';
+            });
+            document.addEventListener('mouseenter', () => {
+                cursorFollower.style.opacity = '1';
+            });
+
+
+            // --- 2. Scroll Reveal Animation Logic (Matching Main Page) ---
+            const animateElements = document.querySelectorAll('.scroll-animate');
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const delay = parseFloat(entry.target.getAttribute('data-delay')) || 0;
+                        
+                        // Apply the transition delay before showing
+                        entry.target.style.transitionDelay = `${delay}s`; 
+                        entry.target.classList.add('is-visible');
+                        
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+            animateElements.forEach(el => observer.observe(el));
+
+
+            // --- 3. Custom Modal / Success Message (No alert/confirm used) ---
+            window.showSuccessMessage = () => {
+                const modal = document.getElementById('success-modal');
+                const modalContent = document.getElementById('modal-content');
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                
+                // Add scale-100 class after a short delay for a smooth animation effect
+                setTimeout(() => {
+                    modalContent.classList.remove('scale-90');
+                }, 10);
+
+                // Reset the form after submission
+                document.getElementById('registration-form').reset();
+            }
+
+            window.hideSuccessMessage = () => {
+                const modal = document.getElementById('success-modal');
+                const modalContent = document.getElementById('modal-content');
+                
+                // Animate out
+                modalContent.classList.add('scale-90');
+                
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                }, 300); // Wait for transition to finish
+            }
+        });
+    </script>
+</body>
+</html>

@@ -194,10 +194,28 @@
                     <a href="#" class="text-gray-600 hover:text-primary-nalikera font-medium interactive">Contact</a>
                 </nav>
                 <!-- CTA Button (Desktop) -->
-                <div class="hidden md:block">
-                    <button class="px-6 py-2 bg-primary-nalikera text-white font-semibold rounded-full hover:bg-dark-nalikera transition duration-300 shadow-lg interactive">
+                <div class="hidden md:block flex items-center space-x-4">
+                    <a href="{% url 'hire_now' %}" class="px-6 py-2 bg-primary-nalikera text-white font-semibold rounded-full hover:bg-dark-nalikera transition duration-300 shadow-lg interactive inline-block">
                         Hire Now
-                    </button>
+                    </a>
+                    {% if user.is_authenticated %}
+                        <!-- User Profile Dropdown -->
+                        <div class="relative">
+                            <button id="profile-btn" class="flex items-center space-x-2 text-gray-600 hover:text-primary-nalikera interactive">
+                                <img src="https://via.placeholder.com/40x40?text=U" alt="User Avatar" class="w-10 h-10 rounded-full">
+                                <span>{{ user.username }}</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <div id="profile-dropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 hidden">
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
+                                <a href="{% url 'logout' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Logout</a>
+                            </div>
+                        </div>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="px-6 py-2 border border-primary-nalikera text-primary-nalikera font-semibold rounded-full hover:bg-primary-nalikera hover:text-white transition duration-300 shadow-lg interactive inline-block">
+                            Sign Up/Login
+                        </a>
+                    {% endif %}
                 </div>
                 <!-- Mobile Menu Button (Hamburger) -->
                 <div class="md:hidden">
@@ -238,9 +256,9 @@
 
                 <!-- Booking Form (Maintained Original Structure) -->
                 <div class="bg-white p-4 md:p-8 rounded-2xl shadow-xl max-w-5xl mx-auto transform -translate-y-4">
-                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                         <!-- Location -->
-                        <div class="relative group">
+                        <div class="relative group flex flex-col justify-end h-20">
                             <label class="block text-sm font-medium text-gray-500 text-left mb-1">Location</label>
                             <div class="flex items-center border border-gray-200 rounded-xl p-3 bg-white hover:border-primary-nalikera transition duration-200 interactive">
                                 <i class="fas fa-map-marker-alt text-gray-400 mr-3"></i>
@@ -249,7 +267,7 @@
                         </div>
 
                         <!-- Service Type (Dropdown: UPDATED) -->
-                        <div class="relative group interactive">
+                        <div class="relative group interactive flex flex-col justify-end h-20">
                             <label class="block text-sm font-medium text-gray-500 text-left mb-1">Service Type</label>
                             <div class="flex items-center border border-gray-200 rounded-xl p-3 bg-white hover:border-primary-nalikera transition duration-200 cursor-pointer" onclick="toggleDropdown(this)">
                                 <i class="fas fa-tractor text-gray-400 mr-3"></i>
@@ -267,7 +285,7 @@
                         </div>
 
                         <!-- Date -->
-                        <div class="relative group">
+                        <div class="relative group flex flex-col justify-end h-20">
                             <label class="block text-sm font-medium text-gray-500 text-left mb-1">Select Date</label>
                             <div class="flex items-center border border-gray-200 rounded-xl p-3 bg-white hover:border-primary-nalikera transition duration-200 interactive">
                                 <i class="fas fa-calendar-alt text-gray-400 mr-3"></i>
@@ -276,7 +294,7 @@
                         </div>
 
                         <!-- Workers (Dropdown: UPDATED) -->
-                        <div class="relative group interactive">
+                        <div class="relative group interactive flex flex-col justify-end h-20">
                             <label class="block text-sm font-medium text-gray-500 text-left mb-1">Number of Workers</label>
                             <div class="flex items-center border border-gray-200 rounded-xl p-3 bg-white hover:border-primary-nalikera transition duration-200 cursor-pointer" onclick="toggleDropdown(this)">
                                 <i class="fas fa-users text-gray-400 mr-3"></i>
@@ -292,10 +310,10 @@
                         </div>
 
                         <!-- Search Button -->
-                        <div class="flex items-end">
-                            <button class="w-full h-[52px] bg-primary-nalikera text-white font-semibold rounded-xl hover:bg-dark-nalikera transition duration-300 shadow-lg interactive">
+                        <div class="flex flex-col justify-end h-20 sm:col-span-2 md:col-span-1 lg:col-span-1">
+                            <a href="{% url 'find_workers' %}" class="w-full h-[52px] bg-primary-nalikera text-white font-semibold rounded-xl hover:bg-dark-nalikera transition duration-300 shadow-lg interactive flex items-center justify-center">
                                 Find Workers
-                            </button>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -932,6 +950,23 @@
             }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
 
             animateElements.forEach(el => observer.observe(el));
+
+
+            // Profile dropdown toggle
+            const profileBtn = document.getElementById('profile-btn');
+            const profileDropdown = document.getElementById('profile-dropdown');
+            if (profileBtn && profileDropdown) {
+                profileBtn.addEventListener('click', () => {
+                    profileDropdown.classList.toggle('hidden');
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!profileBtn.contains(e.target) && !profileDropdown.contains(e.target)) {
+                        profileDropdown.classList.add('hidden');
+                    }
+                });
+            }
         });
     </script>
 </body>
