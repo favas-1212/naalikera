@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify OTP - Nalikera.com</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        :root {
+            --color-primary: #1d8c7c;
+            --color-dark: #125c50;
+            --color-accent: #f59e0b;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border-radius: 20px;
+        }
+
+        .glow-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .glow-input:focus {
+            box-shadow: 0 0 20px rgba(29, 140, 124, 0.5);
+            border-color: var(--color-primary);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .glow-button {
+            background: linear-gradient(45deg, var(--color-primary), var(--color-dark));
+            box-shadow: 0 4px 15px rgba(29, 140, 124, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .glow-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(29, 140, 124, 0.6);
+        }
+
+        .floating-label {
+            position: relative;
+        }
+
+        .floating-label input {
+            padding-top: 20px;
+            padding-bottom: 10px;
+        }
+
+        .floating-label label {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .floating-label input:focus + label,
+        .floating-label input:not(:placeholder-shown) + label {
+            top: 4px;
+            font-size: 12px;
+            color: var(--color-accent);
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: float 6s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center overflow-hidden">
+    <div class="absolute inset-0 overflow-hidden">
+        <div class="particle" style="left: 10%; animation-delay: 0s;"></div>
+        <div class="particle" style="left: 20%; animation-delay: 1s;"></div>
+        <div class="particle" style="left: 30%; animation-delay: 2s;"></div>
+        <div class="particle" style="left: 40%; animation-delay: 3s;"></div>
+        <div class="particle" style="left: 50%; animation-delay: 4s;"></div>
+        <div class="particle" style="left: 60%; animation-delay: 5s;"></div>
+        <div class="particle" style="left: 70%; animation-delay: 6s;"></div>
+        <div class="particle" style="left: 80%; animation-delay: 7s;"></div>
+        <div class="particle" style="left: 90%; animation-delay: 8s;"></div>
+    </div>
+    <div class="max-w-md w-full glass-card p-8 rounded-2xl">
+        <div class="text-center mb-8">
+            <h2 class="text-3xl font-bold text-white mb-2">Verify Your Phone</h2>
+            <p class="text-gray-300">Enter the OTP sent to your mobile number</p>
+        </div>
+        <form id="verifyForm" class="space-y-6">
+            <div class="floating-label">
+                <input type="text" id="phone" placeholder=" " required class="glow-input w-full px-4 py-3 rounded-lg text-white placeholder-transparent">
+                <label class="text-sm">Phone Number</label>
+            </div>
+            <div class="floating-label">
+                <input type="text" id="otp" placeholder=" " required maxlength="6" class="glow-input w-full px-4 py-3 rounded-lg text-white placeholder-transparent">
+                <label class="text-sm">OTP</label>
+            </div>
+            <button type="submit" class="glow-button w-full text-white py-3 px-4 rounded-lg font-semibold">Verify</button>
+        </form>
+        <div class="mt-8 text-center">
+            <p class="text-gray-300"><a href="/nal/" class="text-white hover:text-yellow-300 underline">Skip for now</a></p>
+            <button id="bypassBtn" class="mt-4 px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition duration-300">Bypass Verification (Dev)</button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://127.0.0.1:8000/api/auth';
+
+        // Pre-fill phone if available
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (user.phone) {
+            document.getElementById('phone').value = user.phone;
+        }
+
+        document.getElementById('verifyForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const phone = document.getElementById('phone').value;
+            const otp = document.getElementById('otp').value;
+
+            try {
+                const response = await fetch(`${API_BASE}/verify-otp/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone, otp })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    alert('Phone verified successfully!');
+                    // Update user in localStorage
+                    user.is_phone_verified = true;
+                    localStorage.setItem('user', JSON.stringify(user));
+                    window.location.href = '/nal/';
+                } else {
+                    alert('Verification failed: ' + JSON.stringify(data));
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        });
+
+        document.getElementById('bypassBtn').addEventListener('click', async () => {
+            const token = localStorage.getItem('access_token');
+            if (!token) {
+                alert('Not authenticated');
+                return;
+            }
+            try {
+                const response = await fetch(`${API_BASE}/bypass-verification/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                if (response.ok) {
+                    alert('Verification bypassed!');
+                    user.is_phone_verified = true;
+                    localStorage.setItem('user', JSON.stringify(user));
+                    window.location.href = '/nal/';
+                } else {
+                    alert('Bypass failed');
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+{
+  "name": "Branch Protection Rules",
+  "target": "branch",
+  "enforcement": "active",
+  "bypass_actors": [
+    {
+      "actor_id": 175483151,
+      "actor_type": "User",
+      "bypass_mode": "always"
+    }
+  ],
+  "conditions": {
+    "ref_name": {
+      "include": [
+        "refs/heads/main",
+        "refs/heads/develop"
+      ],
+      "exclude": [
+        "refs/heads/feature/*",
+        "refs/heads/bug/*"
+      ]
+    }
+  },
+  "rules": [
+    {
+      "type": "pull_request",
+      "parameters": {
+        "required_approving_review_count": 1,
+        "dismiss_stale_reviews_on_push": true
+      }
+    },
+    {
+      "type": "non_fast_forward",
+      "parameters": {}
+    },
+    {
+      "type": "commit_message_pattern",
+      "parameters": {
+        "operator": "starts_with",
+        "pattern": "^(feat|fix|docs|style|refactor|test|chore)(\\(.+\\))?: .{1,}"
+      }
+    },
+    {
+      "type": "commit_author_email_pattern",
+      "parameters": {
+        "operator": "contains",
+        "pattern": "@"
+      }
+    }
+  ]
+}
