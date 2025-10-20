@@ -1,4 +1,5 @@
-from django.shortcuts import render
+from django.contrib.auth import authenticate, login, logout
+from django.shortcuts import render, redirect
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -18,14 +19,39 @@ def index(request):
 def nal(request):
     return render(request, 'nal.html')
 
+def hire_now(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    # If logged in, perhaps redirect to a hire page, but for now, back to nal
+    return redirect('nal')
+
+def find_workers(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    # If logged in, perhaps redirect to find workers page, but for now, back to nal
+    return redirect('nal')
+
 def login_view(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect('nal')
+        else:
+            return render(request, 'login.html', {'error': 'Invalid credentials'})
     return render(request, 'login.html')
 
 def signup_view(request, user_type):
-    return render(request, 'signup.html', {'user_type': user_type})
+    return render(request, 'register.html', {'user_type': user_type})
 
 def verify_otp_view(request):
     return render(request, 'verify-otp.html')
+
+def logout_view(request):
+    logout(request)
+    return redirect('nal')
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -148,6 +174,3 @@ def bypass_verification(request):
     user.is_phone_verified = True
     user.save()
     return Response({'message': 'Phone verification bypassed for development'})
-
-def nal(request):
-    return render(request, 'nal.html')

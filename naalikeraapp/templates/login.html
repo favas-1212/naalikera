@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register on Nalikera.com</title>
+    <title>Login to Nalikera.com</title>
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Load Font Awesome Icons -->
@@ -101,112 +101,66 @@
         <div class="text-4xl font-extrabold tracking-tight mb-2">
             <span class="logo-gradient interactive">Nalikera.com</span>
         </div>
-        <h1 class="text-3xl font-bold text-dark-text mt-4">
-            {% if user_type == 'customer' %}User Registration{% else %}Worker Registration{% endif %}
-        </h1>
-        <p class="text-gray-500 mt-2">
-            {% if user_type == 'customer' %}Join our platform to hire skilled workers.{% else %}Join our network of skilled agricultural professionals.{% endif %}
-        </p>
+        <h1 class="text-3xl font-bold text-dark-text mt-4">Login</h1>
+        <p class="text-gray-500 mt-2">Access your account as a user or worker.</p>
     </header>
 
-    <!-- Registration Form Card -->
+    <!-- Login Form Card -->
     <div class="w-full max-w-2xl bg-white p-6 md:p-10 rounded-2xl shadow-xl border border-gray-100 scroll-animate" data-delay="0.3">
         
-        <form id="registration-form" onsubmit="event.preventDefault(); showSuccessMessage();">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <form method="post">
+            {% csrf_token %}
+            <div class="grid grid-cols-1 gap-6">
 
-                <!-- 1. Name -->
-                <div class="col-span-1">
-                    <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                <!-- Username -->
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
                     <div class="flex items-center border border-gray-200 rounded-xl p-3 bg-white focus-within:border-primary-nalikera transition duration-200 interactive">
                         <i class="fas fa-user text-gray-400 mr-3"></i>
-                        <input type="text" id="name" name="name" placeholder="Your full name" required class="w-full focus:outline-none placeholder-gray-400 text-sm"/>
+                        <input type="text" id="username" name="username" placeholder="Your username" required class="w-full focus:outline-none placeholder-gray-400 text-sm"/>
                     </div>
                 </div>
 
-                <!-- 2. Phone Number -->
-                <div class="col-span-1">
-                    <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                <!-- Password -->
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
                     <div class="flex items-center border border-gray-200 rounded-xl p-3 bg-white focus-within:border-primary-nalikera transition duration-200 interactive">
-                        <i class="fas fa-phone text-gray-400 mr-3"></i>
-                        <input type="tel" id="phone" name="phone" placeholder="e.g. 9876543210" pattern="[0-9]{10}" required class="w-full focus:outline-none placeholder-gray-400 text-sm"/>
+                        <i class="fas fa-lock text-gray-400 mr-3"></i>
+                        <input type="password" id="password" name="password" placeholder="Your password" required class="w-full focus:outline-none placeholder-gray-400 text-sm"/>
                     </div>
                 </div>
 
-                <!-- 3. Email -->
-                <div class="col-span-full">
-                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                    <div class="flex items-center border border-gray-200 rounded-xl p-3 bg-white focus-within:border-primary-nalikera transition duration-200 interactive">
-                        <i class="fas fa-envelope text-gray-400 mr-3"></i>
-                        <input type="email" id="email" name="email" placeholder="you@example.com" required class="w-full focus:outline-none placeholder-gray-400 text-sm"/>
+                <!-- Option for User/Worker -->
+                <div>
+                    <p class="text-sm text-gray-600 mb-2">Login as:</p>
+                    <div class="flex space-x-4">
+                        <label class="flex items-center">
+                            <input type="radio" name="user_type" value="customer" checked class="mr-2">
+                            User (Customer)
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="user_type" value="vendor" class="mr-2">
+                            Worker (Vendor)
+                        </label>
                     </div>
                 </div>
 
-                <!-- 4. Location (Village/Town) -->
-                <div class="col-span-1">
-                    <label for="location" class="block text-sm font-medium text-gray-700 mb-1">Local Location / Village</label>
-                    <div class="flex items-center border border-gray-200 rounded-xl p-3 bg-white focus-within:border-primary-nalikera transition duration-200 interactive">
-                        <i class="fas fa-map-pin text-gray-400 mr-3"></i>
-                        <input type="text" id="location" name="location" placeholder="Your village or town" required class="w-full focus:outline-none placeholder-gray-400 text-sm"/>
-                    </div>
-                </div>
-
-                <!-- 5. District (Dropdown for interactivity) -->
-                <div class="col-span-1 relative">
-                    <label for="district" class="block text-sm font-medium text-gray-700 mb-1">District</label>
-                    <div class="flex items-center border border-gray-200 rounded-xl p-3 bg-white focus-within:border-primary-nalikera transition duration-200 interactive">
-                        <i class="fas fa-city text-gray-400 mr-3"></i>
-                        <select id="district" name="district" required class="w-full focus:outline-none text-sm bg-transparent">
-                            <option value="" disabled selected>Select District</option>
-                            <option value="thiruvananthapuram">Thiruvananthapuram</option>
-                            <option value="kollam">Kollam</option>
-                            <option value="pathanamthitta">Pathanamthitta</option>
-                            <option value="alappuzha">Alappuzha</option>
-                            <option value="kottayam">Kottayam</option>
-                            <option value="idukki">Idukki</option>
-                            <option value="ernakulam">Ernakulam</option>
-                            <option value="thrissur">Thrissur</option>
-                            <option value="palakkad">Palakkad</option>
-                            <option value="malappuram">Malappuram</option>
-                            <option value="kozhikode">Kozhikode</option>
-                            <option value="wayanad">Wayanad</option>
-                            <option value="kannur">Kannur</option>
-                            <option value="kasaragod">Kasaragod</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- 6. Address (Full Width) -->
-                <div class="col-span-full">
-                    <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Full Address</label>
-                    <div class="flex items-start border border-gray-200 rounded-xl p-3 bg-white focus-within:border-primary-nalikera transition duration-200 interactive">
-                        <i class="fas fa-home text-gray-400 mr-3 mt-1"></i>
-                        <textarea id="address" name="address" rows="3" placeholder="Street Address, Post Office, Pincode" required class="w-full focus:outline-none placeholder-gray-400 text-sm"></textarea>
-                    </div>
-                </div>
+                {% if error %}
+                <div class="text-red-500 text-sm">{{ error }}</div>
+                {% endif %}
 
                 <!-- Submit Button -->
-                <div class="col-span-full pt-4">
+                <div class="pt-4">
                     <button type="submit" class="w-full py-3 bg-primary-nalikera text-white font-semibold rounded-xl hover:bg-dark-nalikera transition duration-300 shadow-lg interactive text-lg">
-                        Submit Registration
-                        <i class="fas fa-arrow-right ml-2 transition-transform duration-300"></i>
+                        Login
+                        <i class="fas fa-sign-in-alt ml-2 transition-transform duration-300"></i>
                     </button>
                 </div>
             </div>
         </form>
-    </div>
 
-    <!-- Success Message Modal (Custom Alert) -->
-    <div id="success-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-xl p-8 shadow-2xl max-w-sm text-center transform scale-90 transition-all duration-300" id="modal-content">
-            <div class="text-5xl text-primary-nalikera mb-4">
-                <i class="fas fa-check-circle"></i>
-            </div>
-            <h3 class="text-xl font-bold mb-2 text-dark-text">Registration Submitted!</h3>
-            <p class="text-gray-600 mb-6">Thank you for registering with Nalikera.com. We will contact you soon for verification.</p>
-            <button onclick="hideSuccessMessage()" class="px-6 py-2 bg-primary-nalikera text-white font-semibold rounded-full hover:bg-dark-nalikera transition duration-300 interactive">
-                Close
-            </button>
+        <div class="mt-6 text-center">
+            <p class="text-gray-600">Don't have an account? <a href="{% url 'signup' 'customer' %}" class="text-primary-nalikera hover:underline">Register as User</a> or <a href="{% url 'signup' 'vendor' %}" class="text-primary-nalikera hover:underline">Register as Worker</a></p>
         </div>
     </div>
 
@@ -273,36 +227,6 @@
             }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
 
             animateElements.forEach(el => observer.observe(el));
-
-
-            // --- 3. Custom Modal / Success Message (No alert/confirm used) ---
-            window.showSuccessMessage = () => {
-                const modal = document.getElementById('success-modal');
-                const modalContent = document.getElementById('modal-content');
-                modal.classList.remove('hidden');
-                modal.classList.add('flex');
-                
-                // Add scale-100 class after a short delay for a smooth animation effect
-                setTimeout(() => {
-                    modalContent.classList.remove('scale-90');
-                }, 10);
-
-                // Reset the form after submission
-                document.getElementById('registration-form').reset();
-            }
-
-            window.hideSuccessMessage = () => {
-                const modal = document.getElementById('success-modal');
-                const modalContent = document.getElementById('modal-content');
-                
-                // Animate out
-                modalContent.classList.add('scale-90');
-                
-                setTimeout(() => {
-                    modal.classList.add('hidden');
-                    modal.classList.remove('flex');
-                }, 300); // Wait for transition to finish
-            }
         });
     </script>
 </body>
