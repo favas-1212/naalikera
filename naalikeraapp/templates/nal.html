@@ -194,28 +194,15 @@
                     <a href="#" class="text-gray-600 hover:text-primary-nalikera font-medium interactive">Contact</a>
                 </nav>
                 <!-- CTA Button (Desktop) -->
-                <div class="hidden md:block flex items-center space-x-4">
+                <div class="flex items-center justify-between max-w-xs gap-2">
                     <a href="{% url 'hire_now' %}" class="px-6 py-2 bg-primary-nalikera text-white font-semibold rounded-full hover:bg-dark-nalikera transition duration-300 shadow-lg interactive inline-block">
                         Hire Now
                     </a>
-                    {% if user.is_authenticated %}
-                        <!-- User Profile Dropdown -->
-                        <div class="relative">
-                            <button id="profile-btn" class="flex items-center space-x-2 text-gray-600 hover:text-primary-nalikera interactive">
-                                <img src="https://via.placeholder.com/40x40?text=U" alt="User Avatar" class="w-10 h-10 rounded-full">
-                                <span>{{ user.username }}</span>
-                                <i class="fas fa-chevron-down"></i>
-                            </button>
-                            <div id="profile-dropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 hidden">
-                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
-                                <a href="{% url 'logout' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Logout</a>
-                            </div>
-                        </div>
-                    {% else %}
+                    <div id="auth-section">
                         <a href="{% url 'login' %}" class="px-6 py-2 border border-primary-nalikera text-primary-nalikera font-semibold rounded-full hover:bg-primary-nalikera hover:text-white transition duration-300 shadow-lg interactive inline-block">
                             Sign Up/Login
                         </a>
-                    {% endif %}
+                    </div>
                 </div>
                 <!-- Mobile Menu Button (Hamburger) -->
                 <div class="md:hidden">
@@ -950,22 +937,50 @@
             }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
 
             animateElements.forEach(el => observer.observe(el));
+            function attachProfileDropdownHandlers(container) {
+                const profileBtn = container.querySelector('#profile-btn');
+                const profileDropdown = container.querySelector('#profile-dropdown');
 
+                if (!profileBtn || !profileDropdown) {
+                    return;
+                }
 
-            // Profile dropdown toggle
-            const profileBtn = document.getElementById('profile-btn');
-            const profileDropdown = document.getElementById('profile-dropdown');
-            if (profileBtn && profileDropdown) {
-                profileBtn.addEventListener('click', () => {
+                profileBtn.addEventListener('click', (event) => {
+                    event.stopPropagation();
                     profileDropdown.classList.toggle('hidden');
                 });
 
-                // Close dropdown when clicking outside
-                document.addEventListener('click', (e) => {
-                    if (!profileBtn.contains(e.target) && !profileDropdown.contains(e.target)) {
+                document.addEventListener('click', (event) => {
+                    if (!profileBtn.contains(event.target) && !profileDropdown.contains(event.target)) {
                         profileDropdown.classList.add('hidden');
                     }
                 });
+            }
+
+            const authSection = document.getElementById('auth-section');
+            const storedUser = localStorage.getItem('user');
+            const storedAccessToken = localStorage.getItem('access_token');
+
+            if (authSection && storedUser && storedAccessToken) {
+                try {
+                    const user = JSON.parse(storedUser);
+                    authSection.innerHTML = `
+                        <div class="relative">
+                            <button id="profile-btn" class="flex items-center space-x-2 text-gray-600 hover:text-primary-nalikera interactive px-3 py-2 rounded-md hover:bg-gray-100 transition duration-200">
+                                <i class="fas fa-user-circle text-2xl"></i>
+                                <span class="hidden lg:block">${user.username}</span>
+                                <i class="fas fa-chevron-down text-xs"></i>
+                            </button>
+                            <div id="profile-dropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 hidden">
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
+                                <a href="{% url 'logout' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Logout</a>
+                            </div>
+                        </div>
+                    `;
+                    attachProfileDropdownHandlers(authSection);
+                } catch (error) {
+                    console.error('Failed to parse stored user details:', error);
+                }
             }
         });
     </script>

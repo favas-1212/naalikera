@@ -112,15 +112,20 @@
     <!-- Registration Form Card -->
     <div class="w-full max-w-2xl bg-white p-6 md:p-10 rounded-2xl shadow-xl border border-gray-100 scroll-animate" data-delay="0.3">
         
-        <form id="registration-form" onsubmit="event.preventDefault(); showSuccessMessage();">
+        <form method="post" novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="user_type" value="{{ user_type }}">
+            {% if error %}
+            <div class="mb-4 text-red-500 text-sm">{{ error }}</div>
+            {% endif %}
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                 <!-- 1. Name -->
                 <div class="col-span-1">
-                    <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                    <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
                     <div class="flex items-center border border-gray-200 rounded-xl p-3 bg-white focus-within:border-primary-nalikera transition duration-200 interactive">
                         <i class="fas fa-user text-gray-400 mr-3"></i>
-                        <input type="text" id="name" name="name" placeholder="Your full name" required class="w-full focus:outline-none placeholder-gray-400 text-sm"/>
+                        <input type="text" id="username" name="username" value="{{ username }}" placeholder="Your full name" required class="w-full focus:outline-none placeholder-gray-400 text-sm"/>
                     </div>
                 </div>
 
@@ -129,7 +134,7 @@
                     <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
                     <div class="flex items-center border border-gray-200 rounded-xl p-3 bg-white focus-within:border-primary-nalikera transition duration-200 interactive">
                         <i class="fas fa-phone text-gray-400 mr-3"></i>
-                        <input type="tel" id="phone" name="phone" placeholder="e.g. 9876543210" pattern="[0-9]{10}" required class="w-full focus:outline-none placeholder-gray-400 text-sm"/>
+                        <input type="tel" id="phone" name="phone" value="{{ phone }}" placeholder="e.g. 9876543210" pattern="[0-9]{10}" required class="w-full focus:outline-none placeholder-gray-400 text-sm"/>
                     </div>
                 </div>
 
@@ -138,7 +143,16 @@
                     <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
                     <div class="flex items-center border border-gray-200 rounded-xl p-3 bg-white focus-within:border-primary-nalikera transition duration-200 interactive">
                         <i class="fas fa-envelope text-gray-400 mr-3"></i>
-                        <input type="email" id="email" name="email" placeholder="you@example.com" required class="w-full focus:outline-none placeholder-gray-400 text-sm"/>
+                        <input type="email" id="email" name="email" value="{{ email }}" placeholder="you@example.com" required class="w-full focus:outline-none placeholder-gray-400 text-sm"/>
+                    </div>
+                </div>
+
+                <!-- 4. Password -->
+                <div class="col-span-full">
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <div class="flex items-center border border-gray-200 rounded-xl p-3 bg-white focus-within:border-primary-nalikera transition duration-200 interactive">
+                        <i class="fas fa-lock text-gray-400 mr-3"></i>
+                        <input type="password" id="password" name="password" placeholder="Create a password" class="w-full focus:outline-none placeholder-gray-400 text-sm"/>
                     </div>
                 </div>
 
@@ -147,7 +161,7 @@
                     <label for="location" class="block text-sm font-medium text-gray-700 mb-1">Local Location / Village</label>
                     <div class="flex items-center border border-gray-200 rounded-xl p-3 bg-white focus-within:border-primary-nalikera transition duration-200 interactive">
                         <i class="fas fa-map-pin text-gray-400 mr-3"></i>
-                        <input type="text" id="location" name="location" placeholder="Your village or town" required class="w-full focus:outline-none placeholder-gray-400 text-sm"/>
+                        <input type="text" id="location" name="location" value="{{ location }}" placeholder="Your village or town" required class="w-full focus:outline-none placeholder-gray-400 text-sm"/>
                     </div>
                 </div>
 
@@ -181,7 +195,7 @@
                     <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Full Address</label>
                     <div class="flex items-start border border-gray-200 rounded-xl p-3 bg-white focus-within:border-primary-nalikera transition duration-200 interactive">
                         <i class="fas fa-home text-gray-400 mr-3 mt-1"></i>
-                        <textarea id="address" name="address" rows="3" placeholder="Street Address, Post Office, Pincode" required class="w-full focus:outline-none placeholder-gray-400 text-sm"></textarea>
+                        <textarea id="address" name="address" rows="3" placeholder="Street Address, Post Office, Pincode" required class="w-full focus:outline-none placeholder-gray-400 text-sm">{{ address }}</textarea>
                     </div>
                 </div>
 

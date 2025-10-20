@@ -108,51 +108,62 @@
     <!-- Login Form Card -->
     <div class="w-full max-w-2xl bg-white p-6 md:p-10 rounded-2xl shadow-xl border border-gray-100 scroll-animate" data-delay="0.3">
         
-        <form method="post">
-            {% csrf_token %}
+        <form onsubmit="return handleLogin(event)" novalidate>
             <div class="grid grid-cols-1 gap-6">
+                <div id="credential-section" class="grid grid-cols-1 gap-6">
+                    <!-- Username -->
+                    <div>
+                        <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                        <div class="flex items-center border border-gray-200 rounded-xl p-3 bg-white focus-within:border-primary-nalikera transition duration-200 interactive">
+                            <i class="fas fa-user text-gray-400 mr-3"></i>
+                            <input type="text" id="username" name="username" placeholder="Your username" required class="w-full focus:outline-none placeholder-gray-400 text-sm"/>
+                        </div>
+                    </div>
 
-                <!-- Username -->
-                <div>
-                    <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
-                    <div class="flex items-center border border-gray-200 rounded-xl p-3 bg-white focus-within:border-primary-nalikera transition duration-200 interactive">
-                        <i class="fas fa-user text-gray-400 mr-3"></i>
-                        <input type="text" id="username" name="username" placeholder="Your username" required class="w-full focus:outline-none placeholder-gray-400 text-sm"/>
+                    <!-- Password -->
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <div class="flex items-center border border-gray-200 rounded-xl p-3 bg-white focus-within:border-primary-nalikera transition duration-200 interactive">
+                            <i class="fas fa-lock text-gray-400 mr-3"></i>
+                            <input type="password" id="password" name="password" placeholder="Your password" class="w-full focus:outline-none placeholder-gray-400 text-sm"/>
+                        </div>
+                    </div>
+
+                    <!-- Option for User/Worker -->
+                    <div>
+                        <p class="text-sm text-gray-600 mb-2">Login as:</p>
+                        <div class="flex space-x-4">
+                            <label class="flex items-center">
+                                <input type="radio" name="user_type" value="customer" checked class="mr-2">
+                                User (Customer)
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="user_type" value="vendor" class="mr-2">
+                                Worker (Vendor)
+                            </label>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Password -->
-                <div>
-                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                    <div class="flex items-center border border-gray-200 rounded-xl p-3 bg-white focus-within:border-primary-nalikera transition duration-200 interactive">
-                        <i class="fas fa-lock text-gray-400 mr-3"></i>
-                        <input type="password" id="password" name="password" placeholder="Your password" required class="w-full focus:outline-none placeholder-gray-400 text-sm"/>
+                <div id="otp-section" class="hidden space-y-4">
+                    <div>
+                        <label for="otp" class="block text-sm font-medium text-gray-700 mb-1">One-Time Password</label>
+                        <div class="flex items-center border border-gray-200 rounded-xl p-3 bg-white focus-within:border-primary-nalikera transition duration-200 interactive">
+                            <i class="fas fa-key text-gray-400 mr-3"></i>
+                            <input type="text" id="otp" name="otp" placeholder="Enter 6-digit OTP" inputmode="numeric" pattern="\d{6}" maxlength="6" class="w-full focus:outline-none placeholder-gray-400 text-sm"/>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between text-sm text-gray-600">
+                        <p>Enter the code sent to <span id="otp-phone-display" class="font-semibold"></span></p>
+                        <button type="button" id="login-back-button" class="text-primary-nalikera hover:underline">Edit details</button>
                     </div>
                 </div>
 
-                <!-- Option for User/Worker -->
-                <div>
-                    <p class="text-sm text-gray-600 mb-2">Login as:</p>
-                    <div class="flex space-x-4">
-                        <label class="flex items-center">
-                            <input type="radio" name="user_type" value="customer" checked class="mr-2">
-                            User (Customer)
-                        </label>
-                        <label class="flex items-center">
-                            <input type="radio" name="user_type" value="vendor" class="mr-2">
-                            Worker (Vendor)
-                        </label>
-                    </div>
-                </div>
+                <div id="login-error" class="text-red-500 text-sm hidden"></div>
 
-                {% if error %}
-                <div class="text-red-500 text-sm">{{ error }}</div>
-                {% endif %}
-
-                <!-- Submit Button -->
                 <div class="pt-4">
-                    <button type="submit" class="w-full py-3 bg-primary-nalikera text-white font-semibold rounded-xl hover:bg-dark-nalikera transition duration-300 shadow-lg interactive text-lg">
-                        Login
+                    <button type="submit" id="login-submit-button" class="w-full py-3 bg-primary-nalikera text-white font-semibold rounded-xl hover:bg-dark-nalikera transition duration-300 shadow-lg interactive text-lg">
+                        <span id="login-submit-text">Send OTP</span>
                         <i class="fas fa-sign-in-alt ml-2 transition-transform duration-300"></i>
                     </button>
                 </div>
@@ -227,6 +238,210 @@
             }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
 
             animateElements.forEach(el => observer.observe(el));
+
+            const credentialSection = document.getElementById('credential-section');
+            const otpSection = document.getElementById('otp-section');
+            const loginErrorEl = document.getElementById('login-error');
+            const submitButton = document.getElementById('login-submit-button');
+            const submitButtonText = document.getElementById('login-submit-text');
+            const otpPhoneDisplay = document.getElementById('otp-phone-display');
+            const otpInput = document.getElementById('otp');
+            const backButton = document.getElementById('login-back-button');
+
+            const loginState = {
+                step: 'credentials',
+                sessionToken: null,
+                username: null,
+                phone: null,
+            };
+
+            function updateSubmitButtonText() {
+                submitButtonText.textContent = loginState.step === 'credentials' ? 'Send OTP' : 'Verify OTP';
+            }
+
+            function setLoading(isLoading) {
+                submitButton.disabled = isLoading;
+                submitButton.classList.toggle('opacity-60', isLoading);
+                if (isLoading) {
+                    submitButtonText.textContent = loginState.step === 'credentials' ? 'Sending...' : 'Verifying...';
+                } else {
+                    updateSubmitButtonText();
+                }
+            }
+
+            function showError(message) {
+                if (!message) {
+                    loginErrorEl.textContent = '';
+                    loginErrorEl.classList.add('hidden');
+                    return;
+                }
+                loginErrorEl.textContent = message;
+                loginErrorEl.classList.remove('hidden');
+            }
+
+            function maskPhone(phone) {
+                if (!phone || phone.length < 4) {
+                    return phone || '';
+                }
+                const visible = phone.slice(-4);
+                return `${'*'.repeat(Math.max(0, phone.length - 4))}${visible}`;
+            }
+
+            function switchToOtpStep(sessionToken, phone, username) {
+                loginState.step = 'otp';
+                loginState.sessionToken = sessionToken;
+                loginState.phone = phone;
+                loginState.username = username;
+
+                credentialSection.classList.add('hidden');
+                otpSection.classList.remove('hidden');
+                otpPhoneDisplay.textContent = maskPhone(phone);
+                otpInput.value = '';
+                const passwordInput = document.getElementById('password');
+                if (passwordInput) {
+                    passwordInput.value = '';
+                }
+                otpInput.focus();
+                updateSubmitButtonText();
+            }
+
+            function resetToCredentials() {
+                loginState.step = 'credentials';
+                loginState.sessionToken = null;
+                loginState.phone = null;
+                loginState.username = null;
+
+                otpSection.classList.add('hidden');
+                credentialSection.classList.remove('hidden');
+                otpInput.value = '';
+                showError('');
+                updateSubmitButtonText();
+                const usernameInput = document.getElementById('username');
+                if (usernameInput) {
+                    usernameInput.focus();
+                }
+            }
+
+            if (backButton) {
+                backButton.addEventListener('click', () => {
+                    resetToCredentials();
+                    const passwordInput = document.getElementById('password');
+                    if (passwordInput) {
+                        passwordInput.focus();
+                    }
+                });
+            }
+
+            window.handleLogin = function(event) {
+                event.preventDefault();
+                showError('');
+
+                if (loginState.step === 'credentials') {
+                    const username = document.getElementById('username').value.trim();
+                    const password = document.getElementById('password').value;
+                    const userTypeInput = document.querySelector('input[name="user_type"]:checked');
+                    const userType = userTypeInput ? userTypeInput.value : 'customer';
+
+                    if (!username || !password) {
+                        showError('Username and password are required.');
+                        return false;
+                    }
+
+                    setLoading(true);
+
+                    fetch('/api/login/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            username: username,
+                            password: password,
+                            user_type: userType
+                        })
+                    })
+                    .then(async response => {
+                        const data = await response.json().catch(() => ({}));
+                        if (!response.ok) {
+                            const message = data.detail || data.non_field_errors?.[0] || 'Unable to process login.';
+                            showError(message);
+                            return;
+                        }
+
+                        if (data.otp_required && data.session_token) {
+                            switchToOtpStep(data.session_token, data.phone, data.username || username);
+                            showError('');
+                            return;
+                        }
+
+                        if (data.tokens && data.user) {
+                            localStorage.setItem('access_token', data.tokens.access);
+                            localStorage.setItem('refresh_token', data.tokens.refresh);
+                            localStorage.setItem('user', JSON.stringify(data.user));
+                            window.location.href = '/nal/';
+                            return;
+                        }
+
+                        showError('Unexpected response from server.');
+                    })
+                    .catch(error => {
+                        console.error('Login request failed:', error);
+                        showError('Unable to reach the server. Please try again.');
+                    })
+                    .finally(() => {
+                        setLoading(false);
+                    });
+
+                    return false;
+                }
+
+                const enteredOtp = otpInput.value.trim();
+                if (!/^\d{6}$/.test(enteredOtp)) {
+                    showError('Enter the 6-digit OTP sent to your phone.');
+                    return false;
+                }
+
+                setLoading(true);
+
+                fetch('/api/login/confirm-otp/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: loginState.username,
+                        otp: enteredOtp,
+                        session_token: loginState.sessionToken,
+                    })
+                })
+                .then(async response => {
+                    const data = await response.json().catch(() => ({}));
+                    if (!response.ok) {
+                        const message = data.detail || data.non_field_errors?.[0] || 'OTP verification failed.';
+                        showError(message);
+                        return;
+                    }
+
+                    if (data.tokens && data.user) {
+                        localStorage.setItem('access_token', data.tokens.access);
+                        localStorage.setItem('refresh_token', data.tokens.refresh);
+                        localStorage.setItem('user', JSON.stringify(data.user));
+                        window.location.href = '/nal/';
+                        return;
+                    }
+
+                    showError('Unexpected response from server.');
+                })
+                .catch(error => {
+                    console.error('OTP verification failed:', error);
+                    showError('Unable to verify OTP. Please try again.');
+                })
+                .finally(() => {
+                    setLoading(false);
+                });
+
+                return false;
+            };
         });
     </script>
 </body>

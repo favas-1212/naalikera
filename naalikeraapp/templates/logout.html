@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logging out...</title>
+</head>
+<body>
+    <script>
+        (async () => {
+            const accessToken = localStorage.getItem('access_token');
+            const refreshToken = localStorage.getItem('refresh_token');
+
+            try {
+                if (accessToken && refreshToken) {
+                    await fetch('/api/logout/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${accessToken}`,
+                        },
+                        body: JSON.stringify({ refresh: refreshToken }),
+                    });
+                }
+            } catch (error) {
+                console.error('Logout request failed:', error);
+            }
+
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            localStorage.removeItem('user');
+            sessionStorage.removeItem('access_token');
+            sessionStorage.removeItem('refresh_token');
+            sessionStorage.removeItem('user');
+
+            window.location.replace('/nal/');
+        })();
+    </script>
+</body>
+</html>
